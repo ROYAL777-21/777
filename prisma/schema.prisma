@@ -1,0 +1,434 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────────────────────
+//  USER & PROGRESS
+// ─────────────────────────────────────────────────────────────
+
+model User {
+  id        String   @id @default("user_1")
+  name      String   @default("Scribe")
+  image     String   @default("🦁")
+  avatar    String?  // JSON AvatarConfig (SVG avatar system)
+  bio       String   @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  progress         UserProgress?
+  completions      LessonCompletion[]
+  challengeRecords ChallengeProgress[]
+  achievements     UserAchievement[]
+  quests           UserQuest[]
+  items            UserItem[]
+  notifications    AppNotification[]
+  bibleReads       BibleRead[]
+  verseMarks       VerseMark[]
+  planProgress     PlanProgress[]
+  posts            Post[]
+  comments         PostComment[]
+  storyCompletions StoryCompletion[]
+  dailyQuiz        DailyQuizCompletion[]
+}
+
+model UserProgress {
+  id             String  @id @default(cuid())
+  userId         String  @unique
+  user           User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activeCourseId String?
+  activeCourse   Course? @relation(fields: [activeCourseId], references: [id])
+
+  hearts           Int      @default(5)
+  gems             Int      @default(500)
+  xp               Int      @default(0)
+  streak           Int      @default(0)
+  streakFreezes    Int      @default(0)
+  lastActiveDay    String?  // "2026-10-29" date key of last completed lesson
+  doubleXpUntil    DateTime?
+  lastHeartAt      DateTime? // last heart-regeneration anchor
+  leagueId         String?
+  leagueOrder      Int      @default(0) // current league tier index
+  lastWeekKey      String?  // week the user last competed in
+  dailyXp          Int      @default(0) // xp earned today
+  dailyXpDay       String?
+  soundOn          Boolean  @default(true)
+  hapticsOn        Boolean  @default(true)
+  likedPosts       String   @default("[]") // JSON array of post ids the user liked
+  updatedAt        DateTime @updatedAt
+}
+
+// ─────────────────────────────────────────────────────────────
+//  CURRICULUM
+// ─────────────────────────────────────────────────────────────
+
+model Course {
+  id          String  @id @default(cuid())
+  code        String  @unique // "greek" | "hebrew" | "manuscripts" | "apologetics"
+  title       String
+  subtitle    String
+  description String
+  emoji       String
+  color       String  // hex accent
+  order       Int
+  units       Unit[]
+  activeFor   UserProgress[]
+}
+
+model Unit {
+  id          String  @id @default(cuid())
+  courseId    String
+  course      Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  title       String
+  description String
+  emoji       String
+  color       String
+  order       Int
+  difficulty  Int     @default(1) // 1 Foundations · 2 Growing · 3 Advanced (timed challenges)
+  // JSON: { inApp, outsideApp, routine } — growth tips shown in the guidebook
+  tipsJson    String?
+  lessons     Lesson[]
+}
+
+model Lesson {
+  id         String   @id @default(cuid())
+  unitId     String
+  unit       Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  title      String
+  order      Int
+  challenges Challenge[]
+  completions LessonCompletion[]
+}
+
+// type: INFO | SELECT | ASSIST | MATCH | ARRANGE | TYPE
+model Challenge {
+  id              String   @id @default(cuid())
+  lessonId        String
+  lesson          Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  type            String
+  prompt          String   // instruction shown above the exercise
+  question        String   // main content / term / statement
+  meaning         String?  // feedback / explanation shown after answering
+  transliteration String?  // latin-letter reading (logos, shalom…)
+  order           Int
+  options         ChallengeOption[]
+  records         ChallengeProgress[]
+}
+
+model ChallengeOption {
+  id         String    @id @default(cuid())
+  challengeId String
+  challenge  Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  text       String
+  correct    Boolean   @default(false)
+  order      Int
+  matchId    String?   // MATCH: pair key
+  wordOrder  Int?      // ARRANGE: correct position of this word
+}
+
+model LessonCompletion {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lessonId     String
+  lesson       Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  xpEarned     Int
+  comboMax     Int
+  accuracy     Int
+  durationSec  Int
+  completedAt  DateTime @default(now())
+
+  @@unique([userId, lessonId])
+}
+
+model ChallengeProgress {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  challengeId String
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  completed   Boolean   @default(false)
+  mistakes    Int       @default(0)
+
+  @@unique([userId, challengeId])
+}
+
+// ─────────────────────────────────────────────────────────────
+//  GAMIFICATION
+// ─────────────────────────────────────────────────────────────
+
+model Quest {
+  id          String @id @default(cuid())
+  slug        String @unique
+  title       String
+  description String
+  icon        String
+  metric      String // xp | lessons | combo | perfect | correct
+  target      Int
+  gemsReward  Int    @default(15)
+  userQuests  UserQuest[]
+}
+
+model UserQuest {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questId   String
+  quest     Quest    @relation(fields: [questId], references: [id], onDelete: Cascade)
+  day       String   // date key
+  progress  Int      @default(0)
+  completed Boolean  @default(false)
+  claimed   Boolean  @default(false)
+
+  @@unique([userId, questId, day])
+}
+
+model League {
+  id     String @id @default(cuid())
+  name   String // Bronze … Diamond
+  emoji  String
+  order  Int
+  color  String
+  entries LeagueEntry[]
+}
+
+model LeagueEntry {
+  id           String  @id @default(cuid())
+  leagueId     String
+  league       League  @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  weekKey      String  // "2026-W44"
+  userId       String  @default("user_1")
+  displayName  String
+  avatarEmoji  String  @default("📖")
+  targetXp     Int     @default(0) // bots: weekly goal; user: live xp
+  xp           Int     @default(0)
+  isBot        Boolean @default(false)
+  isCurrentUser Boolean @default(false)
+
+  @@unique([leagueId, weekKey, displayName])
+}
+
+model Achievement {
+  id          String @id @default(cuid())
+  slug        String @unique
+  title       String
+  description String
+  icon        String
+  metric      String // streak | xp | lessons | perfect | challenges | quests | courses
+  tiers       String // JSON int[]
+  tierNames   String // JSON string[]
+  userAchievements UserAchievement[]
+}
+
+model UserAchievement {
+  id            String      @id @default(cuid())
+  userId        String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievementId String
+  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+  tier          Int         @default(0)
+  unlockedAt    DateTime?
+
+  @@unique([userId, achievementId])
+}
+
+model StoreItem {
+  id          String @id @default(cuid())
+  slug        String @unique // streak_freeze | heart_refill | double_xp
+  name        String
+  description String
+  icon        String
+  price       Int
+  userItems   UserItem[]
+}
+
+model UserItem {
+  id       String    @id @default(cuid())
+  userId   String
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  itemId   String
+  item     StoreItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  quantity Int       @default(0)
+
+  @@unique([userId, itemId])
+}
+
+model ChestClaim {
+  id        String   @id @default(cuid())
+  userId    String
+  unitId    String
+  claimedAt DateTime @default(now())
+
+  @@unique([userId, unitId])
+}
+
+// ─────────────────────────────────────────────────────────────
+//  DAILY QUIZ (Bible knowledge, 5 questions per day)
+// ─────────────────────────────────────────────────────────────
+
+model DailyQuizCompletion {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  day       String // "2026-10-30"
+  score     Int
+  total     Int
+  xpEarned  Int
+  createdAt DateTime @default(now())
+
+  @@unique([userId, day])
+}
+
+model AppNotification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String   // welcome | streak_risk | streak_saved | quest | achievement | league | reminder | info | friend | social
+  title     String
+  body      String
+  icon      String   @default("🔔")
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+// ─────────────────────────────────────────────────────────────
+//  BIBLE READER
+// ─────────────────────────────────────────────────────────────
+
+model BibleRead {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookId    String   // "gen" … "rev"
+  chapter   Int
+  readAt    DateTime @default(now())
+
+  @@unique([userId, bookId, chapter])
+}
+
+// one mark per verse: color "" = bookmark only
+model VerseMark {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookId    String
+  chapter   Int
+  verse     Int
+  color     String   @default("gold") // gold | rose | teal | violet | bookmark
+  note      String   @default("")
+  createdAt DateTime @default(now())
+
+  @@unique([userId, bookId, chapter, verse])
+}
+
+// reading-plan day check-offs (plan definitions live in code)
+model PlanProgress {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planId      String
+  day         Int
+  completedAt DateTime @default(now())
+
+  @@unique([userId, planId, day])
+}
+
+// ─────────────────────────────────────────────────────────────
+//  STORY MODE (dialogue-based scenarios)
+// ─────────────────────────────────────────────────────────────
+
+model Story {
+  id          String            @id @default(cuid())
+  slug        String            @unique
+  title       String
+  description String
+  emoji       String
+  color       String
+  category    String // bible | apologetics | history | languages
+  difficulty  Int               @default(1) // 1 easy · 2 medium · 3 hard
+  xpReward    Int               @default(20)
+  order       Int
+  // JSON map: speaker name -> emoji (the cast list)
+  castJson    String            @default("{}")
+  scenes      StoryScene[]
+  completions StoryCompletion[]
+}
+
+model StoryScene {
+  id           String @id @default(cuid())
+  storyId      String
+  story        Story  @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  order        Int
+  kind         String // NARRATION | LINE | QUESTION
+  speaker      String? // LINE only — cast member name
+  text         String
+  // QUESTION fields:
+  question     String?
+  optionsJson  String @default("[]") // JSON string[]
+  correctIndex Int    @default(0)
+  meaning      String? // explanation shown after answering
+}
+
+model StoryCompletion {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  storyId     String
+  story       Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  xpEarned    Int
+  perfect     Boolean  @default(false)
+  completedAt DateTime @default(now())
+
+  @@unique([userId, storyId])
+}
+
+// ─────────────────────────────────────────────────────────────
+//  COMMUNITY & FRIENDS
+// ─────────────────────────────────────────────────────────────
+
+model BotUser {
+  id          String  @id // "bot_1" …
+  name        String
+  avatar      String  // JSON AvatarConfig
+  bio         String  @default("")
+  country     String  @default("🌍")
+  streak      Int     @default(0)
+  weeklyXp    Int     @default(0)
+  isFriend    Boolean @default(false)
+  requestedByUser Boolean @default(false) // outgoing request pending
+  requestedToUser Boolean @default(false) // incoming request pending
+  requestedAt DateTime?
+
+  posts       Post[]
+  comments    PostComment[]
+}
+
+model Post {
+  id          String        @id @default(cuid())
+  authorBotId String?
+  bot         BotUser?      @relation(fields: [authorBotId], references: [id], onDelete: Cascade)
+  user        User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String?
+  body        String
+  // JSON card: { kind: achievement|streak|verse|plan|course, title, subtitle, icon, color }
+  attachment  String?
+  likes       Int           @default(0)
+  createdAt   DateTime      @default(now())
+  comments    PostComment[]
+}
+
+model PostComment {
+  id          String   @id @default(cuid())
+  postId      String
+  post        Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  authorBotId String?
+  bot         BotUser? @relation(fields: [authorBotId], references: [id], onDelete: Cascade)
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String?
+  body        String
+  createdAt   DateTime @default(now())
+}

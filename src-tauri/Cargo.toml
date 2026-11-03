@@ -1,0 +1,26 @@
+[package]
+name = "scroll-academy"
+version = "1.0.0"
+description = "Scroll Academy — gamified Bible study (Greek, Hebrew, Manuscripts, Apologetics)"
+authors = ["Scroll Academy"]
+edition = "2021"
+rust-version = "1.77"
+
+# The Tauri CLI is used for development & packaging:
+#   cargo install tauri-cli --version "^2"
+#   cargo tauri dev      (runs Next.js + native window)
+#   cargo tauri build    (produces .dmg/.msi/.AppImage)
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-notification = "2"   # native OS notifications (streak reminders)
+tauri-plugin-vibration = "0.2"    # Android haptics when building for mobile
+tauri-plugin-shell = "2"          # sidecar management (offline server lifecycle)
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[lib]
+name = "scroll_academy_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
