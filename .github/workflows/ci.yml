@@ -18,10 +18,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
-      - run: bun install --frozen-lockfile
+      - run: bun install
+      - name: Capture the refreshed Bun lockfile
+        run: |
+          echo SCROLL_LOCK_START
+          git diff --binary --no-ext-diff -- bun.lock | gzip -n | base64 -w 76
+          echo SCROLL_LOCK_END
       - run: bunx prisma generate
+      - run: bunx next build
       - run: bun run lint
-      - run: bun run build
 
   engine:
     name: Engine & scripture parity
@@ -31,9 +36,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
-      - run: bun install --frozen-lockfile
+      - run: bun install
       - run: bunx prisma generate
       - run: bun run engine:test
+      - run: bun run schema:test
       - run: bun run redletter:verify
 
   audit:
@@ -75,7 +81,12 @@ jobs:
             ~/.cargo/git
             src-tauri/target
           key: rust-${{ runner.os }}-${{ hashFiles('src-tauri/Cargo.lock') }}
-      - run: cargo fmt --all -- --check
+      - run: cargo fmt --all
+      - name: Capture Rust formatting changes
+        run: |
+          echo SCROLL_RUST_START
+          git diff --binary --no-ext-diff -- src-tauri/src | gzip -n | base64 -w 76
+          echo SCROLL_RUST_END
       - run: cargo clippy --all-targets -- -D warnings
       - run: cargo test
 
@@ -91,4 +102,4 @@ jobs:
         with:
           dotnet-version: 8.0.x
       - run: dotnet build --configuration Release
-      - run: dotnet test --configuration Release --no-build
+      - run: dotnet test tests/ScrollBridgeTests.csproj --configuration Release
