@@ -44,7 +44,13 @@ fn ledger_score(input: ledger::LedgerInput) -> ledger::LedgerScores {
 
 /// Native XP math — mirrors the server's `awardActivityXp` rules.
 #[tauri::command]
-fn lesson_xp(difficulty: u32, first_time: bool, perfect: bool, combo: u32, pro_weekend: bool) -> ledger::XpBreakdown {
+fn lesson_xp(
+    difficulty: u32,
+    first_time: bool,
+    perfect: bool,
+    combo: u32,
+    pro_weekend: bool,
+) -> ledger::XpBreakdown {
     ledger::lesson_xp(difficulty, first_time, perfect, combo, pro_weekend)
 }
 
@@ -114,7 +120,9 @@ fn wait_for_server(timeout_secs: u64) -> bool {
     let deadline = Instant::now() + Duration::from_secs(timeout_secs);
     while Instant::now() < deadline {
         if TcpStream::connect_timeout(
-            &format!("127.0.0.1:{SERVER_PORT}").parse().expect("valid addr"),
+            &format!("127.0.0.1:{SERVER_PORT}")
+                .parse()
+                .expect("valid addr"),
             Duration::from_millis(400),
         )
         .is_ok()

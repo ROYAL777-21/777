@@ -129,9 +129,18 @@ mod tests {
         assert_eq!(EVENT_TYPES.len(), 60);
         let mut sorted = EVENT_TYPES.to_vec();
         sorted.sort_unstable();
-        assert_eq!(&sorted, EVENT_TYPES, "the list must be sorted like the TS canonical form");
+        assert_eq!(
+            &sorted, EVENT_TYPES,
+            "the list must be sorted like the TS canonical form"
+        );
         for t in EVENT_TYPES {
-            assert!(t.len() <= 64 && t.bytes().all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'_' || b == b'.'));
+            assert!(
+                t.len() <= 64
+                    && t.bytes().all(|b| b.is_ascii_lowercase()
+                        || b.is_ascii_digit()
+                        || b == b'_'
+                        || b == b'.')
+            );
         }
     }
 

@@ -165,8 +165,8 @@ pub fn score(input: &LedgerInput) -> LedgerScores {
             // silently delete the prior and weaken the model: the exact flip
             // the guard exists to prevent.
             if let Some(prior) = priors.get(id.as_str()) {
-                let same_side = !w.is_nan()
-                    && ((*prior >= 0.0 && *w >= 0.0) || (*prior < 0.0 && *w < 0.0));
+                let same_side =
+                    !w.is_nan() && ((*prior >= 0.0 && *w >= 0.0) || (*prior < 0.0 && *w < 0.0));
                 let guarded = if same_side { *w } else { *prior };
                 weights.insert(id.as_str(), guarded);
             }
@@ -183,20 +183,23 @@ pub fn score(input: &LedgerInput) -> LedgerScores {
     // loyalty blend: recency(fresh) + frequency + consistency + advocacy
     let f = |id: &str| -> f64 {
         let v = input.features.get(id).copied().unwrap_or(0.0);
-        if v.is_nan() { 0.0 } else { v }
+        if v.is_nan() {
+            0.0
+        } else {
+            v
+        }
     };
     let days_since = f("recency.days_since_lesson");
     let recency_part = (1.0 - clamp01(days_since / 14.0)) * 30.0; // 30 pts
     let consistency = clamp01((f("comp.consistency_30d") + f("comp.routine_score")) / 2.0);
     let frequency = clamp01(f("comp.active_days_30d") / 20.0);
     let advocate = clamp01(f("referral.joins") / 5.0);
-    let loyalty = (recency_part
-        + frequency * 30.0
-        + consistency * 25.0
-        + advocate * 15.0)
-        .clamp(0.0, 100.0);
+    let loyalty =
+        (recency_part + frequency * 30.0 + consistency * 25.0 + advocate * 15.0).clamp(0.0, 100.0);
 
-    let engagement = clamp01((frequency * 0.5) + (consistency * 0.3) + ((1.0 - clamp01(days_since / 7.0)) * 0.2));
+    let engagement = clamp01(
+        (frequency * 0.5) + (consistency * 0.3) + ((1.0 - clamp01(days_since / 7.0)) * 0.2),
+    );
 
     LedgerScores {
         churn_risk: (churn * 10_000.0).round() / 10_000.0,
@@ -223,7 +226,13 @@ pub struct XpBreakdown {
 
 /// XP award math (mirrors the server: base by difficulty, first-time +10,
 /// perfect +5, combo tiers, Pro ×2 on weekends).
-pub fn lesson_xp(difficulty: u32, first_time: bool, perfect: bool, combo: u32, is_pro_weekend: bool) -> XpBreakdown {
+pub fn lesson_xp(
+    difficulty: u32,
+    first_time: bool,
+    perfect: bool,
+    combo: u32,
+    is_pro_weekend: bool,
+) -> XpBreakdown {
     let base = match difficulty {
         1 => 10,
         2 => 15,
@@ -231,7 +240,15 @@ pub fn lesson_xp(difficulty: u32, first_time: bool, perfect: bool, combo: u32, i
     } as i64;
     let first_time_bonus = if first_time { 10 } else { 0 };
     let perfect_bonus = if perfect { 5 } else { 0 };
-    let combo_bonus = if combo >= 12 { 5 } else if combo >= 8 { 3 } else if combo >= 5 { 2 } else { 0 };
+    let combo_bonus = if combo >= 12 {
+        5
+    } else if combo >= 8 {
+        3
+    } else if combo >= 5 {
+        2
+    } else {
+        0
+    };
     let difficulty_bonus = match difficulty {
         3 => 5,
         _ => 0,
@@ -239,7 +256,15 @@ pub fn lesson_xp(difficulty: u32, first_time: bool, perfect: bool, combo: u32, i
     let pro_multiplier = if is_pro_weekend { 2.0 } else { 1.0 };
     let subtotal = base + first_time_bonus + perfect_bonus + combo_bonus + difficulty_bonus;
     let total = ((subtotal as f64) * pro_multiplier).round() as i64;
-    XpBreakdown { base, first_time_bonus, perfect_bonus, combo_bonus, difficulty_bonus, pro_multiplier, total }
+    XpBreakdown {
+        base,
+        first_time_bonus,
+        perfect_bonus,
+        combo_bonus,
+        difficulty_bonus,
+        pro_multiplier,
+        total,
+    }
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -265,15 +290,40 @@ mod tests {
 
     #[test]
     fn churn_risk_rises_with_recency() {
-        let fresh = score(&LedgerInput { features: feats(&[("recency.days_since_lesson", 0.0), ("streak.is_alive", 1.0)]), learned_weights: None, learned_bias: None });
-        let stale = score(&LedgerInput { features: feats(&[("recency.days_since_lesson", 9.0), ("streak.is_alive", 0.0)]), learned_weights: None, learned_bias: None });
-        assert!(stale.churn_risk > fresh.churn_risk, "stale {} should exceed fresh {}", stale.churn_risk, fresh.churn_risk);
+        let fresh = score(&LedgerInput {
+            features: feats(&[("recency.days_since_lesson", 0.0), ("streak.is_alive", 1.0)]),
+            learned_weights: None,
+            learned_bias: None,
+        });
+        let stale = score(&LedgerInput {
+            features: feats(&[("recency.days_since_lesson", 9.0), ("streak.is_alive", 0.0)]),
+            learned_weights: None,
+            learned_bias: None,
+        });
+        assert!(
+            stale.churn_risk > fresh.churn_risk,
+            "stale {} should exceed fresh {}",
+            stale.churn_risk,
+            fresh.churn_risk
+        );
     }
 
     #[test]
     fn advocates_score_lower_churn() {
-        let plain = score(&LedgerInput { features: feats(&[("recency.days_since_lesson", 3.0)]), learned_weights: None, learned_bias: None });
-        let advocate = score(&LedgerInput { features: feats(&[("recency.days_since_lesson", 3.0), ("referral.joins", 5.0), ("referral.is_advocate", 1.0)]), learned_weights: None, learned_bias: None });
+        let plain = score(&LedgerInput {
+            features: feats(&[("recency.days_since_lesson", 3.0)]),
+            learned_weights: None,
+            learned_bias: None,
+        });
+        let advocate = score(&LedgerInput {
+            features: feats(&[
+                ("recency.days_since_lesson", 3.0),
+                ("referral.joins", 5.0),
+                ("referral.is_advocate", 1.0),
+            ]),
+            learned_weights: None,
+            learned_bias: None,
+        });
         assert!(advocate.churn_risk <= plain.churn_risk);
     }
 
@@ -282,11 +332,25 @@ mod tests {
         // a malicious/buggy learned weight tries to make recency REDUCE churn
         let mut learned = HashMap::new();
         learned.insert("recency.days_since_lesson".to_string(), -5.0);
-        let guarded = score(&LedgerInput { features: feats(&[("recency.days_since_lesson", 8.0)]), learned_weights: Some(learned), learned_bias: None });
-        let base = score(&LedgerInput { features: feats(&[("recency.days_since_lesson", 8.0)]), learned_weights: None, learned_bias: None });
-        assert!(guarded.churn_risk >= base.churn_risk, "sign guard must prevent flipping the prior direction");
+        let guarded = score(&LedgerInput {
+            features: feats(&[("recency.days_since_lesson", 8.0)]),
+            learned_weights: Some(learned),
+            learned_bias: None,
+        });
+        let base = score(&LedgerInput {
+            features: feats(&[("recency.days_since_lesson", 8.0)]),
+            learned_weights: None,
+            learned_bias: None,
+        });
+        assert!(
+            guarded.churn_risk >= base.churn_risk,
+            "sign guard must prevent flipping the prior direction"
+        );
         // a REJECTED flip leaves the prior standing — exactly the base score
-        assert_eq!(guarded.churn_risk, base.churn_risk, "wrong-sign override must be dropped, not clamped to 0 (which deletes the prior)");
+        assert_eq!(
+            guarded.churn_risk, base.churn_risk,
+            "wrong-sign override must be dropped, not clamped to 0 (which deletes the prior)"
+        );
     }
 
     #[test]
@@ -294,14 +358,32 @@ mod tests {
         // a legitimately trained weight carries the prior's sign and passes through
         let mut sharpen = HashMap::new();
         sharpen.insert("recency.days_since_lesson".to_string(), 1.5); // prior +0.62, same side
-        let sharpened = score(&LedgerInput { features: feats(&[("recency.days_since_lesson", 8.0)]), learned_weights: Some(sharpen), learned_bias: None });
-        let base = score(&LedgerInput { features: feats(&[("recency.days_since_lesson", 8.0)]), learned_weights: None, learned_bias: None });
-        assert!(sharpened.churn_risk > base.churn_risk, "same-sign learned weight must be honored (training sharpens priors)");
+        let sharpened = score(&LedgerInput {
+            features: feats(&[("recency.days_since_lesson", 8.0)]),
+            learned_weights: Some(sharpen),
+            learned_bias: None,
+        });
+        let base = score(&LedgerInput {
+            features: feats(&[("recency.days_since_lesson", 8.0)]),
+            learned_weights: None,
+            learned_bias: None,
+        });
+        assert!(
+            sharpened.churn_risk > base.churn_risk,
+            "same-sign learned weight must be honored (training sharpens priors)"
+        );
         // NaN payload → prior stands, never NaN out
         let mut nan_w = HashMap::new();
         nan_w.insert("recency.days_since_lesson".to_string(), f64::NAN);
-        let na = score(&LedgerInput { features: feats(&[("recency.days_since_lesson", 8.0)]), learned_weights: Some(nan_w), learned_bias: None });
-        assert_eq!(na.churn_risk, base.churn_risk, "NaN learned weight must fall back to the prior");
+        let na = score(&LedgerInput {
+            features: feats(&[("recency.days_since_lesson", 8.0)]),
+            learned_weights: Some(nan_w),
+            learned_bias: None,
+        });
+        assert_eq!(
+            na.churn_risk, base.churn_risk,
+            "NaN learned weight must fall back to the prior"
+        );
     }
 
     #[test]
@@ -315,7 +397,15 @@ mod tests {
 
     #[test]
     fn loyalty_is_bounded_0_100() {
-        let s = score(&LedgerInput { features: feats(&[("comp.active_days_30d", 999.0), ("comp.consistency_30d", 999.0), ("referral.joins", 999.0)]), learned_weights: None, learned_bias: None });
+        let s = score(&LedgerInput {
+            features: feats(&[
+                ("comp.active_days_30d", 999.0),
+                ("comp.consistency_30d", 999.0),
+                ("referral.joins", 999.0),
+            ]),
+            learned_weights: None,
+            learned_bias: None,
+        });
         assert!((0.0..=100.0).contains(&s.loyalty));
     }
 
@@ -337,7 +427,11 @@ mod tests {
 
     #[test]
     fn unknown_features_never_panic() {
-        let s = score(&LedgerInput { features: HashMap::new(), learned_weights: None, learned_bias: None });
+        let s = score(&LedgerInput {
+            features: HashMap::new(),
+            learned_weights: None,
+            learned_bias: None,
+        });
         assert!((0.0..=1.0).contains(&s.churn_risk));
         assert!(s.engagement.is_finite());
     }
