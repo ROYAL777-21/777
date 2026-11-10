@@ -62,7 +62,7 @@ export const BOOKS: BibleBook[] = [
   { id: "php", name: "Philippians", testament: "NT", genre: "Epistles", chapters: 4, summary: "Joy from a prison cell" },
   { id: "col", name: "Colossians", testament: "NT", genre: "Epistles", chapters: 4, summary: "The supremacy of Christ over everything" },
   { id: "1th", name: "1 Thessalonians", testament: "NT", genre: "Epistles", chapters: 5, summary: "Faith, love, hope — and His coming" },
-  { id: "2th", name: "2 Thessalonians", testament: "NT", genre: "Epistles", chapters: 3, summary: "Steadfastness while the man of lawlessness waits" },
+  { id: "2th", name: "2 Thessalonians", testament: "NT", genre: "Epistles", chapters: 3, summary: "Stand firm — the man of lawlessness will be revealed and destroyed" },
   { id: "1ti", name: "1 Timothy", testament: "NT", genre: "Epistles", chapters: 6, summary: "How to behave in the household of God" },
   { id: "2ti", name: "2 Timothy", testament: "NT", genre: "Epistles", chapters: 4, summary: "Paul's last letter: finish the race" },
   { id: "tit", name: "Titus", testament: "NT", genre: "Epistles", chapters: 3, summary: "Sound doctrine that produces good works" },
@@ -338,8 +338,8 @@ export function verseOfDay(dayKey: string): { ref: string; bookId: string; chapt
   }
   const pool = [
     "jhn 3:16", "psa 23:1", "rom 8:28", "php 4:13", "pro 3:5", "isa 41:10", "jer 29:11", "mat 11:28",
-    "psa 46:10", "1co 13:13", "heb 11:1", "josh 1:9", "psa 119:105", "gal 2:20", "eph 2:8", "2ti 1:7",
-    "psa 27:1", "lam 3:22", "james 1:5", "1pe 5:7", "rev 21:4", "psa 121:1", "mat 6:33", "col 3:23",
+    "psa 46:10", "1co 13:13", "heb 11:1", "jos 1:9", "psa 119:105", "gal 2:20", "eph 2:8", "2ti 1:7",
+    "psa 27:1", "lam 3:22", "jas 1:5", "1pe 5:7", "rev 21:4", "psa 121:1", "mat 6:33", "col 3:23",
   ]
   const pick = pool[Math.abs(h) % pool.length]
   const [ref, verseS] = pick.split(":")

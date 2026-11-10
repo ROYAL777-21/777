@@ -67,6 +67,9 @@ export function mineVocab(unit: SeedUnit): VocabEntry[] {
         const q = ch.question.replace(/\s+/g, " ").trim()
         const isTermLike = q.length <= 34 && !q.endsWith("?") && !q.includes("___")
         if (!isTermLike) continue
+        // skip decorative check-labels ("⚙️ Grammar check") that some sel() styles put in the question slot
+        const isLabel = /check/i.test(q) || !/^[A-Za-z0-9\"'(]/.test(q) || q === ch.prompt?.trim()
+        if (isLabel) continue
         const meaning = ch.meaning ? short(ch.meaning) : short(ch.options.find((o) => o.correct)?.text ?? "")
         push({
           term: q,
@@ -83,13 +86,27 @@ export function mineVocab(unit: SeedUnit): VocabEntry[] {
 /** recitation lines for SPEAK in content courses (verses / key sentences) */
 function mineRecitations(unit: SeedUnit): { text: string; translit?: string; meaning?: string }[] {
   const out: { text: string; translit?: string; meaning?: string }[] = []
+  const push = (raw: string, translit?: string, meaning?: string) => {
+    const t = raw.replace(/\s+/g, " ").trim()
+    if (t.length < 8 || t.length > 110) return
+    if (/^[#*>-]/.test(t)) return
+    if (out.some((o) => o.text === t)) return
+    out.push({ text: t, translit, meaning })
+  }
   for (const lesson of unit.lessons) {
     for (const ch of lesson.challenges) {
-      if (ch.type === "INFO" && ch.question && ch.question.length <= 60 && !out.some((o) => o.text === ch.question)) {
-        out.push({ text: ch.question, meaning: ch.meaning ?? undefined })
+      if (ch.type === "INFO" && ch.meaning) {
+        // speak the teaching card's first sentence, not its (often playful) title
+        const first = ch.meaning.split(/(?<=[.!?])\s/)[0] ?? ""
+        push(first, ch.transliteration ?? undefined, ch.meaning)
       }
-      if (ch.type === "ARRANGE" && ch.question && ch.question.length <= 90 && !out.some((o) => o.text === ch.question)) {
-        out.push({ text: ch.question, translit: ch.transliteration ?? undefined, meaning: ch.meaning ?? undefined })
+      if (ch.type === "ARRANGE") {
+        // join the word-bank tokens in order — the actual sentence
+        const words = ch.options
+          .filter((o) => o.wordOrder && o.wordOrder > 0)
+          .sort((a, b) => (a.wordOrder ?? 0) - (b.wordOrder ?? 0))
+          .map((o) => o.text)
+        if (words.length >= 3) push(words.join(" "), ch.transliteration ?? undefined, ch.meaning ?? undefined)
       }
     }
   }
@@ -98,7 +115,7 @@ function mineRecitations(unit: SeedUnit): { text: string; translit?: string; mea
 
 // ── challenge builders ────────────────────────────────────────
 
-function listenChallenge(v: VocabEntry, reverse: boolean): SeedChallenge {
+function listenChallenge(v: VocabEntry, reverse: boolean, termDistractors: string[] = []): SeedChallenge {
   if (reverse) {
     // see the definition → choose the TERM (harder)
     return {
@@ -107,7 +124,7 @@ function listenChallenge(v: VocabEntry, reverse: boolean): SeedChallenge {
       question: v.definition,
       meaning: `${v.term}${v.translit ? ` (${v.translit})` : ""} — ${v.definition}`,
       transliteration: v.translit,
-      options: mixOptions(v.term, v.distractors),
+      options: mixOptions(v.term, termDistractors.length >= 2 ? termDistractors : v.distractors),
     }
   }
   // hear the term → choose the meaning
@@ -219,7 +236,7 @@ export function expandUnitWithDeepPractice(unit: SeedUnit): SeedUnit["lessons"] 
         prompt: "Study this",
         question: "✍️ Spelling Studio",
         meaning:
-          "Type each term after reading its meaning. For Greek and Hebrew an on-screen letter keyboard appears — tap the letters in order (Hebrew goes right to left!). Spelling forces your brain to encode every letter, which is why spellers recognize words twice as fast when reading.",
+          "Type each term after reading its meaning. For Greek and Hebrew an on-screen letter keyboard appears — tap the letters in order (Hebrew goes right to left!). Spelling forces your brain to encode every letter, which is why strong spellers recognize words more quickly when reading.",
         options: [],
       },
     ]
@@ -285,7 +302,17 @@ export function expandUnitWithDeepPractice(unit: SeedUnit): SeedUnit["lessons"] 
   // ── +5 Unit Mastery ──
   {
     const forward = pickN(vocab, 3, 113).map((v) => listenChallenge(v, false))
-    const reverse = pickN(vocab, 3, 131).map((v) => listenChallenge(v, true))
+    const reverse = pickN(vocab, 3, 131).map((v) =>
+      listenChallenge(
+        v,
+        true,
+        pickN(
+          vocab.filter((o) => o.term !== v.term && o.term.length <= 40),
+          3,
+          139 + v.term.length,
+        ).map((o) => o.term),
+      )
+    )
     const hard = pickN(pool.filter((c) => c.type === "ARRANGE" || c.type === "TYPE"), 3, 149)
     const challenges: SeedChallenge[] = [
       {

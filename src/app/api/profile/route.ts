@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { getOrCreateUser, USER_ID, levelInfo, dayKey } from "@/lib/gamification"
 import { buildCourseSummary } from "@/lib/courseService"
+import { TZ_OFFSET_MS as TZ_OFFSET_MS_LOCAL } from "@/lib/time"
 import type { ProfilePayload } from "@/lib/types"
 
 export async function GET() {
@@ -101,7 +102,7 @@ export async function GET() {
       days.push(dayKey(d))
     }
     const history = days.map((day) => {
-      const dayStart = new Date(day + "T00:00:00Z").getTime() - 8 * 3600 * 1000
+      const dayStart = new Date(day + "T00:00:00Z").getTime() - TZ_OFFSET_MS_LOCAL
       const dayEnd = dayStart + 86400000
       const inDay = completions.filter((c) => {
         const t = c.completedAt.getTime()
@@ -115,6 +116,7 @@ export async function GET() {
       image: user.image,
       avatar: user.avatar ?? null,
       bio: user.bio,
+      plan: progress.plan,
       chaptersRead,
       friends: friendsCount,
       streak: progress.streak,
@@ -126,6 +128,7 @@ export async function GET() {
       avgAccuracy,
       challengesCorrect,
       questsCompleted,
+      dailyGoal: progress.dailyGoal ?? null, // v11.5: goal agency
       courses,
       achievements,
       history,
@@ -139,6 +142,12 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  try {
+    const len = Number(req.headers.get("content-length") ?? 0)
+    if (Number.isFinite(len) && len > 50_000) return NextResponse.json({ error: "payload too large" }, { status: 413 })
+  } catch {
+    /* header read failed — proceed to the route's own handling */
+  }
   try {
     const { name, image, avatar, bio } = (await req.json()) as {
       name?: string

@@ -11,7 +11,7 @@ export const existenceCourse: SeedCourse = {
     "Walk through the great arguments for God — cosmological, contingency, design, moral, and beyond — with their strongest objections. Learn to weigh evidence like a philosopher, not just quote an answer.",
   emoji: "✨",
   color: "#A21CAF",
-  order: 8,
+  order: 9,
   units: [
     {
       title: "The God Question",
@@ -97,7 +97,7 @@ export const existenceCourse: SeedCourse = {
             typeAns(
               "Type the Greek word for faith used in the New Testament",
               "The Greek word",
-              ["pistis", "πιστις", "pistis!"],
+              ["pistis", "πιστις", "πίστις", "pistis!"],
               "πίστις (pistis) — trust, reliance, allegiance. Never 'believing what you know ain't so.'",
               "pistis"
             ),
@@ -161,7 +161,7 @@ export const existenceCourse: SeedCourse = {
           challenges: [
             info(
               "The oldest opening move",
-              "The kalam cosmological argument, refined by medieval theologians and revived in our day: (1) Whatever begins to exist has a cause. (2) The universe began to exist. (3) Therefore, the universe has a cause. Short, deductive, and explosive — IF the premises hold. Let us test them like professionals.",
+              "The kalam cosmological argument — refined by al-Ghazali (1058–1111) and revived today by William Lane Craig: (1) Whatever begins to exist has a cause. (2) The universe began to exist. (3) Therefore, the universe has a cause. Short, deductive, and explosive — IF the premises hold. Let us test them like professionals.",
             ),
             arrange(
               "Build the kalam argument in its correct order",
@@ -201,7 +201,7 @@ export const existenceCourse: SeedCourse = {
           challenges: [
             info(
               "Premise 2 — the evidence of astronomy",
-              "In 1929 Edwin Hubble saw the galaxies racing away from each other — the universe is EXPANDING. Rewind the film and everything converges to a beginning: the standard Big Bang model. Arno Penzias, who detected the afterglow: 'The best data we have are exactly what I would have predicted, had I nothing to go on but the five books of Moses, and the Psalms.' Science caught up with 'In the beginning.'",
+              "In 1929 Edwin Hubble saw the galaxies racing away from each other — the universe is EXPANDING. Rewind the film and everything converges to a beginning: the standard Big Bang model. Arno Penzias, who detected the afterglow: 'The best data we have are exactly what I would have predicted, had I nothing to go on but the five books of Moses, the Psalms, the Bible as a whole.' Science caught up with 'In the beginning.'",
             ),
             sel(
               "Hubble's 1929 discovery showed that the universe is…",
@@ -417,7 +417,7 @@ export const existenceCourse: SeedCourse = {
           challenges: [
             info(
               "The dials are set — precisely",
-              "The universe's fundamental constants sit on a knife's edge. If gravity were stronger by one part in 10^60, stars burn out in millions of years; weaker, and galaxies never form. The cosmological constant is fine-tuned to perhaps 1 part in 10^120 — a precision like throwing a dart from the Andes and hitting a bullseye one atom wide in the Alps. The strong nuclear force shifts 2% either way and the periodic table — and chemistry, and life — vanishes.",
+              "The universe's fundamental constants sit on a knife's edge. If gravity were slightly stronger relative to electromagnetism — roughly one part in 10^36 — only short-lived stars would form; slightly weaker, and galaxies never coalesce. The cosmological constant is fine-tuned to perhaps 1 part in 10^120 — a precision like throwing a dart from the Andes and hitting a bullseye one atom wide in the Alps. Shift the strong nuclear force by even ~0.5% and the carbon and oxygen life depends on could not both exist (Oberhummer et al.) — the periodic table, chemistry, and life vanish.",
             ),
             sel(
               "Fine-tuning refers to…",
@@ -457,7 +457,7 @@ export const existenceCourse: SeedCourse = {
           challenges: [
             info(
               "Three suspects",
-              "When a detective meets an improbable result, she considers three explanations: CHANCE (it just happened), NECESSITY (it had to happen), or DESIGN (someone intended it). Chance: the odds are incomprehensibly small — not one lucky dart but dozens landing together. Necessity: no known physics FORCES these values; string theory's landscape treats them as environmental accidents. That leaves design — a mind that chose the dials. Physicists themselves reach for design-language ('the Anthropic Principle') then try to un-say it.",
+              "When a detective meets an improbable result, she considers three explanations: CHANCE (it just happened), NECESSITY (it had to happen), or DESIGN (someone intended it). Chance: the odds are incomprehensibly small — not one lucky dart but dozens landing together. Necessity: no known physics FORCES these values; string theory's landscape treats them as environmental accidents. That leaves design — a mind that chose the dials. Physicists themselves sometimes slip into design-sounding language — Hoyle's 'a put-up job' — then pull back to selection-effect talk ('the Anthropic Principle').",
             ),
             sel(
               "The three candidate explanations of fine-tuning are…",
@@ -506,19 +506,19 @@ export const existenceCourse: SeedCourse = {
             ),
             info(
               "What the wager costs",
-              "Notice: no telescope has seen another universe. The multiverse is UNOBSERVABLE BY PRINCIPLE — and it multiplies entities beyond anything Occam's razor tolerates: billions of unobservable universes to avoid ONE designer. Worse, it backfires: a multiverse-generating mechanism itself needs laws precise enough to churn out universes — fine-tuning one level up! When a theory's main job is to avoid a conclusion rather than explain the data, philosophy calls it an ad hoc rescue. Designer vs multiverse: one entity with intent, or infinite entities without evidence.",
+              "Notice: no telescope has seen another universe. The multiverse is unobservable so far — and it multiplies entities beyond anything Occam's razor tolerates: billions of unobservable universes to avoid ONE designer (a few models predict testable CMB collision signatures; none has been found). Worse, it backfires: a multiverse-generating mechanism itself needs laws precise enough to churn out universes — fine-tuning one level up! When a theory's main job is to avoid a conclusion rather than explain the data, philosophy calls it an ad hoc rescue. Designer vs multiverse: one entity with intent, or infinite entities without evidence.",
             ),
             sel(
               "Why do critics call the multiverse an 'ad hoc' move against fine-tuning?",
               "⚖️ Philosophy of science",
               "It is unobservable in principle and multiplies entities to dodge a conclusion",
               ["Because it contradicts Genesis directly", "Because it was proposed by atheists", "Because it has no mathematical form"],
-              "From Bayes' view: if the multiverse is not independently evidenced, it cannot raise the probability of our tuned universe. It is a patch, not an explanation.",
+              "In Bayesian terms, a hypothesis invented solely to absorb one improbable result gains almost nothing: with no independent evidence its prior is tiny, so the probability boost is bought by ad-hocness. It is a patch, not an explanation.",
             ),
             match("Tap the pairs", [
               ["Fine-tuning data", "narrow life-permitting dials"],
               ["Design", "one mind, one intent"],
-              ["Multiverse", "many universes, no observer"],
+              ["Multiverse", "many universes — we see only the life-permitting one"],
               ["Ad hoc rescue", "theory built to dodge a result"],
               ["Occam's razor", "do not multiply entities"],
             ]),
@@ -552,7 +552,7 @@ export const existenceCourse: SeedCourse = {
             ),
             info(
               "Two escape routes — both costly",
-              "The skeptic can deny objective morality exists (premise 2): 'torturing children for fun is just your preference.' But almost no one can live that way — the same skeptic will cry REAL injustice when wronged, when tyrants oppress, when human-subject research ethics are violated. Or he can keep objective morals without God (deny premise 1) — but then WHAT grounds them? Sociobiology explains why we FEEL morals; it cannot make them TRUE. Explaining the belief is not the same as grounding the fact.",
+              "The skeptic can deny objective morality exists (premise 2): 'torturing children for fun is just your preference.' But almost no one can live that way — the same skeptic will cry REAL injustice when wronged, when tyrants oppress, when human-subject research ethics are violated. Or he can keep objective morals without God (deny premise 1) — but then WHAT grounds them? Some philosophers posit moral facts as brute necessary truths, like mathematical facts — but abstract, non-personal facts still lack the authority of a command, and they face Mackie's own 'queerness' objection; a Necessary Mind explains why moral truths are also BINDING on persons. Sociobiology explains why we FEEL morals; it cannot make them TRUE. Explaining the belief is not the same as grounding the fact.",
             ),
             sel(
               "The moral argument does NOT claim that…",
@@ -618,7 +618,7 @@ export const existenceCourse: SeedCourse = {
           challenges: [
             info(
               "Conscience: signal, not static",
-              "Every culture, every era, every tribe shows a startling moral overlap: courage over cowardice, loyalty over betrayal, care for children, horror at murder and betrayal. Anthropology's exceptions (spartan exposure, honor killings) prove the rule — they are justified by DEEPER appeals to loyalty or honor, never by celebrating betrayal as such. C.S. Lewis built his case in Mere Christianity on this 'Tao' — the universal moral grammar. Grammar needs a grammarian.",
+              "Every culture, every era, every tribe shows a startling moral overlap: courage over cowardice, loyalty over betrayal, care for children, horror at murder and betrayal. Anthropology's exceptions (spartan exposure, honor killings) prove the rule — they are justified by DEEPER appeals to loyalty or honor, never by celebrating betrayal as such. C.S. Lewis built his moral-law case in Mere Christianity and named this universal moral grammar 'the Tao' in The Abolition of Man. Grammar needs a grammarian.",
             ),
             sel(
               "Cross-cultural moral overlap is best explained by…",
@@ -629,7 +629,7 @@ export const existenceCourse: SeedCourse = {
             ),
             info(
               "Dignity: the moral argument's crown",
-              "If humans are cosmic accidents, human rights are a polite fiction — nature knows no rights, only power. But if humans are made in the image of a personal Creator, every person has worth no vote can revoke. Historian's footnote: the abolition of slavery, hospitals, and human-rights language all grew from theology's soil. Even secular humanism is, as one philosopher put it, 'Christianity's unpaid debt' — cut from its roots, the flower fades. Objective dignity requires a dignifier.",
+              "If humans are cosmic accidents, human rights are a polite fiction — nature knows no rights, only power. But if humans are made in the image of a personal Creator, every person has worth no vote can revoke. Historian's footnote: the abolition of slavery, hospitals, and human-rights language all grew from theology's soil. Even secular humanism is Christianity's legacy — philosopher Jürgen Habermas, no Christian, calls universal human rights 'the direct legacy of the Judaic ethic of justice and the Christian ethic of love.' Objective dignity requires a dignifier.",
             ),
             sel(
               "Human rights that no vote can revoke make sense IF…",

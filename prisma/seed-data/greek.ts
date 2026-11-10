@@ -638,7 +638,7 @@ export const greekCourse: SeedCourse = {
           challenges: [
             info(
               "Object case",
-              "When a noun RECEIVES the action, it slips into the ACCUSATIVE: ὁ λόγος becomes τὸν λόγον. Article and noun change together — ὁ/τό → τό/τὸν. Spot the -ν ending and you've usually found the object!"
+              "When a noun RECEIVES the action, it slips into the ACCUSATIVE: ὁ λόγος becomes τὸν λόγον. Article and noun change together — ὁ → τόν (masc.), while the neuter τό stays τό in the accusative. Spot the -ν ending and you've usually found the object!"
             ),
             sel(
               "Which form is the OBJECT: 'the word'?",

@@ -27,4 +27,11 @@ export const haptics = {
   complete: () => vib([30, 60, 30, 60, 90]),
   combo: () => vib(18),
   notify: () => vib([40, 60, 40]),
+  // ── v11.4 motion pairing ────────────────────────────────
+  /** the double side-cannon celebration */
+  celebrate: () => vib([25, 40, 25, 40, 25, 40, 120]),
+  /** streak flame ignition */
+  streak: () => vib([15, 30, 15, 30, 60]),
+  /** splash reveal */
+  reveal: () => vib([20, 50, 30]),
 }

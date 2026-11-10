@@ -136,9 +136,13 @@ export async function POST(req: Request) {
       gems: totalGems,
       hearts,
       dailyXp,
-      dailyXpGoal: 50,
+      dailyXpGoal: progress.dailyGoal ?? 50,
       correctCount,
       totalQuestions,
+      durationSec: Math.max(0, Math.round(body.durationSec ?? 0)),
+      mannaBonus: null,
+      records: [],
+      league: null,
     }
     return NextResponse.json(result)
   } catch (e) {

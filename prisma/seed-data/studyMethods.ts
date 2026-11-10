@@ -16,7 +16,7 @@ export const studyMethodsCourse: SeedCourse = {
       description: "Observation, Interpretation, Application — the foundational discipline.",
       emoji: "🔎",
       color: "#BE123C",
-      difficulty: 2,
+      difficulty: 1,
       lessons: [
         {
           title: "Observation: See First",
@@ -45,7 +45,7 @@ export const studyMethodsCourse: SeedCourse = {
               "Ezra 'set his heart to study the Law… and to ___ it'",
               "Ezra 7:10 — study, do, teach. In that order.",
               "do",
-              ["teach", "defend", "sing"],
+              ["memorize", "defend", "sing"],
               "Study → do → teach: the sequence that guards teachers from hypocrisy.",
             ),
             sel(
@@ -211,7 +211,7 @@ export const studyMethodsCourse: SeedCourse = {
           challenges: [
             info(
               "Poetry: the heart of the text",
-              "Hebrew poetry rhymes IDEAS, not sounds: parallelism — SYNONYMOUS (second line echoes, Ps 24:1), ANTITHETICAL (second line contrasts, Prov 15:1), SYNTHETIC (second line advances, Ps 1:3). Images are bold on purpose: 'trees clapping their hands' is metaphor, not meteorology. Read slowly, aloud, feeling-first — then think.",
+              "Hebrew poetry rhymes IDEAS, not sounds: parallelism — SYNONYMOUS (second line echoes, Ps 24:1), ANTITHETICAL (second line contrasts, Prov 15:1), SYNTHETIC (second line advances, Ps 1:3). Images are bold on purpose: 'trees clapping their hands' (Isa 55:12) is personification, not meteorology. Read slowly, aloud, feeling-first — then think.",
             ),
             info(
               "Prophecy: near and far",
@@ -258,7 +258,7 @@ export const studyMethodsCourse: SeedCourse = {
             ),
             info(
               "Parables: one point, sharp edges",
-              "A parable is an earthly story with a heavenly punch. Rules: 1) Find the ONE main point (and the 'hook' — the detail that shocks). 2) Identify the audience (disciples? crowds? Pharisees?) — Luke 15's three lost things answer grumbling religionists. 3) Note the kingdom reversal: the elder brother sulks while the whore gets the ring. Don't allegorize every detail — the sower isn't about farming technique.",
+              "A parable is an earthly story with a heavenly punch. Rules: 1) Find the ONE main point (and the 'hook' — the detail that shocks). 2) Identify the audience (disciples? crowds? Pharisees?) — Luke 15's three lost things answer grumbling religionists. 3) Note the kingdom reversal: the elder brother sulks while the runaway son gets the ring. Don't allegorize every detail — the sower isn't about farming technique.",
             ),
             sel(
               "The first job with a parable is to find…",
@@ -351,7 +351,7 @@ export const studyMethodsCourse: SeedCourse = {
           challenges: [
             info(
               "The classic case: agapē vs phileō",
-              "Folk-etymology claims agapē is God's special divine love and phileō mere friendship. But: the Father loves (phileō) the Son (Jn 5:20); Paul 'kissed' (same root) his friends; and in 2 Sam 13 (LXX), Amnon agapa-s his sister Tamar… and then hates her. The correction: words don't carry fixed theological cargo — CONTEXT loads the meaning. Word studies serve context, never replace it.",
+              "Folk-etymology claims agapē is God's special divine love and phileō mere friendship. But: the Father loves (phileō) the Son (Jn 5:20); Paul commands the 'holy kiss' (philēma — same root, Rom 16:16); and in 2 Sam 13 (LXX), Amnon agapa-s his sister Tamar… and then hates her. The correction: words don't carry fixed theological cargo — CONTEXT loads the meaning. Word studies serve context, never replace it.",
             ),
             info(
               "How to do a responsible word study",
@@ -589,7 +589,7 @@ export const studyMethodsCourse: SeedCourse = {
             ),
             info(
               "Memorize Psalm 23:1 (KJV)",
-              "'The LORD is my shepherd; I shall not want.' — Six Hebrew-English words that reframe a whole life: royal Keeper, personal pronoun, and a soul provided for.",
+              "'The LORD is my shepherd; I shall not want.' — Nine English words (four in Hebrew) that reframe a whole life: royal Keeper, personal pronoun, and a soul provided for.",
             ),
             arrange(
               "Assemble Psalm 23:1 (KJV)",

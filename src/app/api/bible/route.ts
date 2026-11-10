@@ -14,12 +14,14 @@ export async function GET() {
       db.bibleRead.findMany({ where: { userId: USER_ID }, orderBy: { readAt: "desc" } }),
       db.verseMark.findMany({ where: { userId: USER_ID }, orderBy: { createdAt: "desc" } }),
     ])
+    const progress = await db.userProgress.findUnique({ where: { userId: USER_ID }, select: { redLetterOn: true } })
     const payload: BibleStatePayload = {
       read: reads.map((r) => `${r.bookId}-${r.chapter}`),
       marks: marks.map((m) => ({ bookId: m.bookId, chapter: m.chapter, verse: m.verse, color: m.color, note: m.note })),
       chaptersRead: reads.length,
       totalChapters,
       lastRead: reads[0] ? { bookId: reads[0].bookId, chapter: reads[0].chapter } : null,
+      redLetterOn: progress?.redLetterOn ?? true,
     }
     return NextResponse.json(payload)
   } catch (e) {

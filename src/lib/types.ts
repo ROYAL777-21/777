@@ -33,6 +33,20 @@ export type BootstrapUser = {
   levelIntoXp: number
   levelSpanXp: number
   xpForNext: number
+  // Scroll Pro entitlements
+  plan: "free" | "pro" | "lifetime"
+  isPro: boolean
+  onTrial: boolean
+  trialEndsAt: string | null
+
+  // v11.5 — the daily clock + goal agency
+  lastActiveDay: string | null
+  manna: {
+    day: string
+    collected: boolean
+    mannaStreak: number
+    verse: { text: string; ref: string }
+  }
 }
 
 export type BootstrapLesson = {
@@ -120,6 +134,33 @@ export type CompleteResult = {
   dailyXpGoal: number
   correctCount: number
   totalQuestions: number
+  // v11.5 — the peak-end layer
+  durationSec: number
+  mannaBonus: number | null // the rare "extra manna fell" surprise XP
+  records: string[] // personal bests beaten this run (competence signals)
+  league: {
+    rank: number
+    moved: number // rank change from this lesson (positive = climbed)
+    nextUp: { name: string; gap: number } | null
+    promotionZone: number
+  } | null
+}
+
+// ── Today's Manna (v11.5) ──
+
+export type MannaPayload = {
+  day: string
+  collected: boolean
+  mannaStreak: number
+  verse: { text: string; ref: string }
+}
+
+export type MannaCollectResult = {
+  ok: boolean
+  day: string
+  collected: boolean
+  mannaStreak: number
+  xpEarned: number
 }
 
 // ── daily quiz ──
@@ -270,6 +311,7 @@ export type ProfilePayload = {
   image: string
   avatar: string | null
   bio: string
+  plan: string
   chaptersRead: number
   friends: number
   streak: number
@@ -281,6 +323,7 @@ export type ProfilePayload = {
   avgAccuracy: number
   challengesCorrect: number
   questsCompleted: number
+  dailyGoal: number | null // v11.5: goal agency — null = engine-sized
   courses: CourseSummary[]
   achievements: AchievementDTO[]
   history: { day: string; xp: number; lessons: number }[]
@@ -315,6 +358,7 @@ export type BibleStatePayload = {
   chaptersRead: number
   totalChapters: number
   lastRead: { bookId: string; chapter: number } | null
+  redLetterOn: boolean // words of God/Christ shown in red
 }
 
 export type BibleReadResult = {
@@ -441,6 +485,76 @@ export type PostAttachment = {
   subtitle: string
   icon: string
   color: string
+}
+
+// ── church plan (B2B admin dashboard) ──
+
+export type ChurchMemberDTO = {
+  id: string
+  name: string
+  emoji: string
+  role: "admin" | "member"
+  isYou: boolean
+  joinedAt: string
+  lessons: number
+  chaptersRead: number
+  streak: number
+  weeklyXp: number
+  lastActiveDaysAgo: number
+  lastActiveLabel: string
+  status: "active" | "quiet" | "lapsed"
+  weeks: { lessons: number; chapters: number; xp: number }[]
+}
+
+export type ChurchDashboardPayload = {
+  org: {
+    name: string
+    city: string
+    tier: string
+    tierLabel: string
+    seatsTotal: number
+    seatsUsed: number
+    priceMonthly: number
+    renewalAt: string
+    startedAt: string
+    contactName: string
+    contactEmail: string
+    focusCourse: string
+  }
+  you: { name: string; role: string }
+  members: ChurchMemberDTO[]
+  cohort: {
+    activeThisWeek: number
+    lessonsTotal: number
+    lessonsAvg: number
+    chaptersRead: number
+    totalChapters: number
+    coveragePct: number
+    coveragePerMember: number
+    streakBands: { label: string; count: number; color: string }[]
+    engagementBands: { label: string; count: number; color: string }[]
+    weekly: { label: string; lessons: number; chapters: number; xp: number }[]
+    atRisk: { name: string; lastActiveLabel: string; streak: number }[]
+  }
+}
+
+// ── gift subscriptions (the checkout order bump) ──
+
+export type GiftCodeDTO = {
+  code: string
+  months: number
+  fromName: string
+  message: string
+  toLabel: string
+  purchasedAt: string
+  redeemedAt: string | null
+  redeemedName: string | null
+  link: string
+}
+
+export type GiftListPayload = {
+  sent: GiftCodeDTO[]
+  redeemed: GiftCodeDTO[]
 }
 
 export type PostCommentDTO = {

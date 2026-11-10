@@ -90,7 +90,7 @@ export async function POST(req: Request) {
         totalXp: progress.xp,
         gems: progress.gems,
         dailyXp: progress.dailyXpDay === day ? progress.dailyXp : 0,
-        dailyXpGoal: 50,
+        dailyXpGoal: progress.dailyGoal ?? 50,
       }
       return NextResponse.json(result)
     }
@@ -182,7 +182,7 @@ export async function POST(req: Request) {
       totalXp,
       gems: totalGems,
       dailyXp,
-      dailyXpGoal: 50,
+      dailyXpGoal: progress.dailyGoal ?? 50,
     }
     return NextResponse.json(result)
   } catch (e) {

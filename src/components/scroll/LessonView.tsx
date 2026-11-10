@@ -2,15 +2,18 @@
 
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { motion, AnimatePresence } from "framer-motion"
-import confetti from "canvas-confetti"
+import { motion, AnimatePresence, useAnimationControls } from "framer-motion"
 import { X, Heart, Zap, Flame, Timer, Target, ChevronRight } from "lucide-react"
 import { useAppStore, normalizeAnswer, seededShuffle } from "@/lib/client/store"
 import { sfx } from "@/lib/client/sound"
 import { haptics } from "@/lib/client/haptics"
 import { fireBrowserNotification } from "@/lib/client/notify"
 import { courseLang } from "@/lib/client/tts"
+import { spring } from "@/lib/motion"
+import { cannons, burst } from "@/lib/motion/confetti"
+import { CountUp } from "@/components/motion/CountUp"
 import type { ChallengeDTO, CompleteResult, LessonPayload } from "@/lib/types"
+import type { EngineStateClient } from "@/lib/client/engine"
 import { Mascot } from "./Mascot"
 import { ListenCard, TermAudioButton } from "./AudioCards"
 import { SpeakExercise } from "./SpeakExercise"
@@ -40,6 +43,10 @@ export function LessonView({ session }: { session: { lessonId: string; title: st
     },
     staleTime: Infinity,
   })
+
+  // Scroll Pro: unlimited hearts
+  const { data: boot } = useQuery<{ user: { isPro: boolean } }>({ queryKey: ["bootstrap"] })
+  const isPro = boot?.user.isPro ?? false
 
   // session state
   const [idx, setIdx] = useState(0)
@@ -102,12 +109,16 @@ export function LessonView({ session }: { session: { lessonId: string; title: st
       sfx.fanfare()
       haptics.complete()
       setTimeout(() => {
-        confetti({
-          particleCount: 160,
-          spread: 80,
-          origin: { y: 0.62 },
-          colors: ["#58CC02", "#FFC800", "#9B5DE5", "#E4453D", "#0F8A80"],
-        })
+        // Duolingo-style double side-fires + a central kick
+        cannons(70)
+        setTimeout(() => cannons(50), 220)
+        setTimeout(() => burst({ y: 0.62 }, 90), 400)
+        if (r.streakIncreased) {
+          setTimeout(() => {
+            sfx.streak()
+            haptics.streak()
+          }, 650)
+        }
       }, 120)
       refreshApp()
     },
@@ -118,6 +129,8 @@ export function LessonView({ session }: { session: { lessonId: string; title: st
         firstTime: false, streak: 0, streakIncreased: false, usedFreeze: false, milestone: null,
         questsCompleted: [], achievementsUnlocked: [], totalXp: 0, gems: 0, hearts,
         dailyXp: 0, dailyXpGoal: 50, correctCount: 0, totalQuestions: total,
+        durationSec: Math.round((Date.now() - startTime.current) / 1000),
+        mannaBonus: null, records: [], league: null,
       })
     },
   })
@@ -135,6 +148,24 @@ export function LessonView({ session }: { session: { lessonId: string; title: st
   const [speakGood, setSpeakGood] = useState<boolean | null>(null)
   // shake trigger
   const [shakeKey, setShakeKey] = useState(0)
+  // v11.4: whole-screen shake on a wrong answer (re-triggerable)
+  const screenShake = useAnimationControls()
+  useEffect(() => {
+    // entrance (controls own the animate prop, so start it here)
+    void screenShake.start({ opacity: 1, y: 0, transition: spring.soft })
+  }, [])
+  useEffect(() => {
+    if (shakeKey > 0) {
+      void screenShake.start({ x: [0, -10, 10, -6, 6, -2, 0], transition: { duration: 0.42 } })
+    }
+  }, [shakeKey, screenShake])
+  // v11.4: a broken heart floats off when a heart is lost
+  const [heartGhost, setHeartGhost] = useState(0)
+  const prevHearts = useRef(hearts)
+  useEffect(() => {
+    if (hearts < prevHearts.current) setHeartGhost((g) => g + 1)
+    prevHearts.current = hearts
+  }, [hearts])
 
   useEffect(() => {
     // reset per-challenge state
@@ -303,8 +334,8 @@ export function LessonView({ session }: { session: { lessonId: string; title: st
       sfx.wrong()
       haptics.wrong()
       recordAnswer(false)
-      // lose a heart (not for MATCH, never for SPEAK self-ratings)
-      if (challenge.type !== "MATCH" && challenge.type !== "SPEAK") {
+      // lose a heart (not for MATCH, never for SPEAK self-ratings; Pro is unlimited)
+      if (!isPro && challenge.type !== "MATCH" && challenge.type !== "SPEAK") {
         setHearts((h) => Math.max(0, h - 1))
         sfx.heartLost()
         haptics.heartLost()
@@ -314,7 +345,7 @@ export function LessonView({ session }: { session: { lessonId: string; title: st
   }
 
   const onContinue = () => {
-    if (status === "wrong" && hearts <= 0) {
+    if (status === "wrong" && hearts <= 0 && !isPro) {
       setOutOfHearts(true)
       return
     }
@@ -352,9 +383,9 @@ export function LessonView({ session }: { session: { lessonId: string; title: st
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
+      animate={screenShake}
       exit={{ opacity: 0, y: 30 }}
-      transition={{ type: "spring", stiffness: 260, damping: 28 }}
+      transition={spring.soft}
       className="fixed inset-0 z-[80] parchment-bg flex flex-col"
       role="dialog"
       aria-label={`Lesson: ${session.title}`}
@@ -372,14 +403,14 @@ export function LessonView({ session }: { session: { lessonId: string; title: st
           <X className="w-6 h-6 text-muted-foreground" />
         </button>
 
-        {/* segmented progress */}
+        {/* segmented progress — v11.4: the lunge spring */}
         <div className="flex-1 h-4 rounded-full bg-[#eee6cd] overflow-hidden">
           <motion.div
             className="h-full rounded-full relative"
             style={{ backgroundColor: status === "wrong" ? "#FF4B4B" : "#58CC02" }}
             initial={false}
             animate={{ width: `${Math.max(4, progressPct)}%` }}
-            transition={{ type: "spring", stiffness: 120, damping: 20 }}
+            transition={spring.lunge}
           >
             <AnimatePresence>
               {status === "correct" && (
@@ -409,11 +440,28 @@ export function LessonView({ session }: { session: { lessonId: string; title: st
           </motion.div>
         )}
 
-        <div className="flex items-center gap-1 font-black text-lg">
-          <Heart className={`w-6 h-6 text-duo-red fill-duo-red ${hearts === 0 ? "opacity-30" : ""}`} />
+        <div className="relative flex items-center gap-1 font-black text-lg">
+          <Heart className={`w-6 h-6 text-duo-red fill-duo-red ${hearts === 0 && !isPro ? "opacity-30" : ""}`} />
           <motion.span key={hearts} initial={{ scale: 1.3 }} animate={{ scale: 1 }} className="tabular-nums">
-            {hearts}
+            {isPro ? "∞" : hearts}
           </motion.span>
+          {/* v11.4: the broken heart floats away */}
+          <AnimatePresence>
+            {heartGhost > 0 && (
+              <motion.span
+                key={heartGhost}
+                initial={{ opacity: 0.9, y: 0, scale: 0.7, rotate: 0 }}
+                animate={{ opacity: 0, y: -34, scale: 1.25, rotate: -24 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.85, ease: "easeOut" }}
+                onAnimationComplete={() => setHeartGhost(0)}
+                className="absolute -top-1 right-0 text-lg"
+                aria-hidden="true"
+              >
+                💔
+              </motion.span>
+            )}
+          </AnimatePresence>
         </div>
       </header>
 
@@ -492,6 +540,18 @@ export function LessonView({ session }: { session: { lessonId: string; title: st
                     <motion.button
                       key={o.id}
                       whileTap={{ scale: 0.96 }}
+                      animate={
+                        showCorrect
+                          ? { scale: [1, 1.08, 1], x: 0 }
+                          : showWrong
+                            ? { x: [0, -8, 8, -4, 4, 0], scale: 0.98 }
+                            : { scale: 1, x: 0 }
+                      }
+                      transition={
+                        showCorrect || showWrong
+                          ? { duration: 0.34, ease: "easeOut" }
+                          : spring.snappy
+                      }
                       onClick={() => {
                         if (status !== "answering") return
                         sfx.tap()
@@ -531,6 +591,18 @@ export function LessonView({ session }: { session: { lessonId: string; title: st
                     <motion.button
                       key={o.id}
                       whileTap={{ scale: 0.96 }}
+                      animate={
+                        showCorrect
+                          ? { scale: [1, 1.08, 1], x: 0 }
+                          : showWrong
+                            ? { x: [0, -8, 8, -4, 4, 0], scale: 0.98 }
+                            : { scale: 1, x: 0 }
+                      }
+                      transition={
+                        showCorrect || showWrong
+                          ? { duration: 0.34, ease: "easeOut" }
+                          : spring.snappy
+                      }
                       onClick={() => {
                         if (status !== "answering") return
                         sfx.tap()
@@ -1052,8 +1124,14 @@ function ResultsScreen({
   const setShareDraft = useAppStore((s) => s.setShareDraft)
   const setView = useAppStore((s) => s.setView)
   const endLesson = useAppStore((s) => s.endLesson)
+  const openPaywall = useAppStore((s) => s.openPaywall)
+  const { data: boot } = useQuery<{ user: { isPro: boolean } }>({ queryKey: ["bootstrap"] })
+  const isPro = boot?.user.isPro ?? false
 
-  // count-up XP
+  // v11.5 — the engine's session-end hook: the tone-matched send-off line
+  // that closes the session (peak-end rule). Comes from the Scribe's Ledger.
+  const { data: engine } = useQuery<EngineStateClient>({ queryKey: ["engine/state"] })
+  const sessionHook = engine?.sessionHook
   useEffect(() => {
     let raf = 0
     const start = performance.now()
@@ -1073,7 +1151,17 @@ function ResultsScreen({
   ]
 
   const accuracy = result.totalQuestions > 0 ? Math.round((result.correctCount / result.totalQuestions) * 100) : 100
-  const duration = Math.max(1, Math.round((Date.now() - 0) / 1000))
+  // v11.5 — the clock is real now: server-timed duration of THIS run,
+  // not the old staged estimate
+  const fmtDur = (s: number) => {
+    if (s <= 0) return "—"
+    if (s < 60) return `${s}s`
+    const m = Math.floor(s / 60)
+    const r = s % 60
+    return r ? `${m}m ${r}s` : `${m}m`
+  }
+  const goalPct = Math.min(100, Math.round((result.dailyXp / Math.max(1, result.dailyXpGoal)) * 100))
+  const RING_C = 2 * Math.PI * 23
 
   return (
     <motion.div
@@ -1104,10 +1192,10 @@ function ResultsScreen({
           {result.perfect ? "Flawless — not a single mistake! ✨" : "Every word studied is a seed planted."}
         </motion.p>
 
-        {/* stat cards */}
-        <div className="grid grid-cols-3 gap-2.5 w-full mb-4">
+        {/* stat cards — v11.5: the Speedy card shows the real server-timed run */}
+        <div className="grid grid-cols-3 gap-2.5 w-full mb-3">
           <StatCard color="#FFC800" label="Total XP" value={`${shownXp}`} icon={<Zap className="w-5 h-5" />} delay={0.3} sub={result.doubled ? "2× boost!" : undefined} />
-          <StatCard color="#E4453D" label="Speedy" value={`${Math.max(15, (result.totalQuestions * 12 + 20))}s`} icon={<Timer className="w-5 h-5" />} delay={0.38} />
+          <StatCard color="#E4453D" label="Speedy" value={fmtDur(result.durationSec)} icon={<Timer className="w-5 h-5" />} delay={0.38} />
           <StatCard color="#9B5DE5" label="Accuracy" value={`${accuracy}%`} icon={<Target className="w-5 h-5" />} delay={0.46} />
         </div>
 
@@ -1139,6 +1227,118 @@ function ResultsScreen({
           )}
         </AnimatePresence>
 
+        {/* v11.5 — the goal ring: today's portion at one glance.
+            Fills as the day's XP lands; a finished day crowns. */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, type: "spring", stiffness: 280, damping: 22 }}
+          className="w-full bg-white border-2 border-paper-border rounded-2xl shadow-[0_4px_0_#e8e0c8] p-3.5 flex items-center gap-3.5 mb-3"
+        >
+          <div className="relative w-14 h-14 shrink-0">
+            <svg viewBox="0 0 56 56" className="w-14 h-14 -rotate-90">
+              <circle cx="28" cy="28" r="23" fill="none" stroke="#eee6cd" strokeWidth="8" />
+              <motion.circle
+                cx="28" cy="28" r="23" fill="none"
+                stroke={goalPct >= 100 ? "#FFC800" : "#58CC02"}
+                strokeWidth="8" strokeLinecap="round"
+                strokeDasharray={RING_C}
+                initial={false}
+                animate={{ strokeDashoffset: RING_C * (1 - goalPct / 100) }}
+                transition={{ type: "spring", stiffness: 60, damping: 18, delay: 0.7 }}
+              />
+            </svg>
+            <span className="absolute inset-0 grid place-items-center text-lg font-black">{goalPct >= 100 ? "🏆" : "⚡"}</span>
+          </div>
+          <div className="min-w-0">
+            <p className="font-black leading-tight">{goalPct >= 100 ? "Daily goal complete — blessed work!" : "Daily goal"}</p>
+            <p className="text-sm text-muted-foreground font-bold">
+              {result.dailyXp}/{result.dailyXpGoal} XP today{goalPct < 100 ? ` · ${Math.max(0, result.dailyXpGoal - result.dailyXp)} to go` : ""}
+            </p>
+          </div>
+        </motion.div>
+
+        {/* v11.5 — the rare grace note: extra manna fell on this lesson.
+            Deterministic per (lesson, day), first-run only — never farmable. */}
+        <AnimatePresence>
+          {result.mannaBonus != null && result.mannaBonus > 0 && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ delay: 0.62, type: "spring", stiffness: 340, damping: 17 }}
+              className="w-full bg-duo-gold/20 border-2 border-duo-gold/60 rounded-2xl p-3.5 flex items-center gap-3 mb-3"
+            >
+              <motion.span
+                className="text-3xl shrink-0"
+                animate={{ rotate: [0, -12, 12, -7, 0], y: [0, -4, 0] }}
+                transition={{ duration: 1.1, delay: 0.8, repeat: 1 }}
+              >
+                🌾
+              </motion.span>
+              <div>
+                <p className="font-black text-sm">Extra manna fell — +{result.mannaBonus} XP</p>
+                <p className="text-xs font-bold text-muted-foreground">A portion from the morning's overflow. Grace upon grace.</p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* v11.5 — personal bests: evidence of skill, not attendance.
+            Each chip is a run beaten against the learner's OWN history. */}
+        {result.records.length > 0 && (
+          <div className="w-full flex flex-wrap gap-2 mb-3">
+            {result.records.map((r, i) => (
+              <motion.span
+                key={r}
+                initial={{ opacity: 0, scale: 0.6, y: 8 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ delay: 0.72 + i * 0.13, type: "spring", stiffness: 380, damping: 15 }}
+                className="inline-flex items-center gap-1.5 bg-white border-2 border-duo-gold/70 rounded-full pl-1.5 pr-3 py-1 text-xs font-black text-[#5c4500] shadow-[0_3px_0_#e8d48a]"
+              >
+                <span className="w-6 h-6 rounded-full bg-duo-gold grid place-items-center text-sm">🏅</span>
+                {r}
+              </motion.span>
+            ))}
+          </div>
+        )}
+
+        {/* v11.5 — the invisible scoreboard, at the moment it moved:
+            rank, the climb, and the one catchable scribe ahead. */}
+        <AnimatePresence>
+          {result.league && (
+            <motion.button
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ delay: 0.82, type: "spring", stiffness: 280, damping: 22 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => {
+                sfx.tap()
+                haptics.tap()
+                endLesson()
+                setView("leaderboard")
+              }}
+              className="w-full bg-white border-2 border-paper-border rounded-2xl shadow-[0_4px_0_#e8e0c8] p-3 flex items-center gap-3 mb-3 text-left"
+            >
+              <span className="text-2xl shrink-0">🏆</span>
+              <span className="min-w-0 flex-1">
+                <span className="block font-black text-sm leading-tight">
+                  Rank #{result.league.rank} this week
+                  {result.league.moved > 0 ? <span className="text-duo-green-dark"> · climbed {result.league.moved} 📈</span> : null}
+                  {result.league.rank <= result.league.promotionZone ? <span className="text-duo-gold-dark"> · promotion zone!</span> : null}
+                </span>
+                <span className="block text-xs font-bold text-muted-foreground leading-snug">
+                  {result.league.nextUp
+                    ? `${result.league.nextUp.name} is ${result.league.nextUp.gap} XP ahead — one lesson catches them`
+                    : "You lead the cohort — keep the lamp lit"}
+                </span>
+              </span>
+              <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
+            </motion.button>
+          )}
+        </AnimatePresence>
+
         {/* quest/achievement popups */}
         <div className="w-full flex flex-col gap-2">
           <AnimatePresence>
@@ -1160,6 +1360,31 @@ function ResultsScreen({
             ))}
           </AnimatePresence>
         </div>
+
+        {/* Scroll Pro upsell — the high right after a win (free users only).
+            v11.5: the false-scarcity line is gone; honesty is the mechanism
+            ("let your yea be yea"). Just the plain terms of the trial. */}
+        {!isPro && (
+          <motion.button
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.66 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => {
+              sfx.tap()
+              haptics.tap()
+              openPaywall("lessonEnd")
+            }}
+            className="w-full bg-duo-gold/15 border-2 border-duo-gold/50 rounded-2xl p-3 flex items-center gap-3 mt-3 text-left"
+          >
+            <span className="text-2xl">👑</span>
+            <span className="min-w-0 flex-1">
+              <span className="block font-black text-sm">Unlimited hearts + 2× XP weekends</span>
+              <span className="block text-xs font-bold text-muted-foreground">First 7 days free — cancel anytime, in two taps.</span>
+            </span>
+            <span className="text-[10px] font-black uppercase bg-duo-gold text-[#5c4500] rounded-full px-2 py-1 shrink-0">Try free</span>
+          </motion.button>
+        )}
 
         <div className="flex items-center gap-2 mt-4 mb-2 font-black text-duo-purple">
           <span className="text-xl">💎</span> +{result.gemsEarned} gems
@@ -1190,6 +1415,20 @@ function ResultsScreen({
         >
           📣 Share to community
         </motion.button>
+
+        {/* v11.5 — the session-end farewell: the engine's tone-matched
+            send-off (peak-end rule). The last line the learner reads. */}
+        {sessionHook && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.88 }}
+            className="mt-5 mb-1 text-center"
+          >
+            <p className="text-sm font-black text-duo-green-dark">{sessionHook.title} 📜</p>
+            <p className="text-xs font-bold text-muted-foreground leading-snug max-w-xs mx-auto">{sessionHook.body}</p>
+          </motion.div>
+        )}
 
         <motion.button
           initial={{ opacity: 0, y: 12 }}

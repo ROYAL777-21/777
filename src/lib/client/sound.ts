@@ -95,4 +95,36 @@ export const sfx = {
     tone(880, 0, 0.09, "sine", 0.08)
     tone(1174.66, 0.1, 0.16, "sine", 0.07)
   },
+  // ── v11.4 motion-pairing cues ─────────────────────────────────
+  /** soft pop for confetti kicks / pin pops */
+  confettiPop() {
+    if (!enabled) return
+    tone(1046.5, 0, 0.05, "triangle", 0.05)
+    tone(1568, 0.03, 0.07, "triangle", 0.04)
+  },
+  /** rising sparkle for streak flames & combo highs */
+  streak() {
+    if (!enabled) return
+    tone(587.33, 0, 0.08, "triangle", 0.07)
+    tone(783.99, 0.07, 0.08, "triangle", 0.07)
+    tone(1174.66, 0.14, 0.16, "triangle", 0.08)
+  },
+  /** coin-ish xp gain */
+  xp() {
+    if (!enabled) return
+    tone(987.77, 0, 0.06, "square", 0.035)
+    tone(1318.5, 0.05, 0.12, "square", 0.03)
+  },
+  /** gentle whoosh for the parting sea / sheet exits */
+  whoosh() {
+    if (!enabled) return
+    tone(220, 0, 0.5, "sine", 0.05, 110)
+    tone(330, 0.08, 0.42, "sine", 0.03, 165)
+  },
+  /** page/view switch tick */
+  swish() {
+    if (!enabled) return
+    tone(660, 0, 0.045, "sine", 0.03)
+    tone(880, 0.035, 0.05, "sine", 0.025)
+  },
 }

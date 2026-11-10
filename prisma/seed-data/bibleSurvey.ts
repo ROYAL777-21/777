@@ -99,11 +99,11 @@ export const bibleSurveyCourse: SeedCourse = {
               ["Nehemiah", "Return & rebuild"],
             ]),
             assist(
-              "A new reader wanting the fullest portrait of Jesus should start with the Gospel of ___",
+              "Per this course's tip — Mark is the fastest, John the deepest — which Gospel gives the deepest portrait of Jesus for a new reader?",
               "It reads like an eyewitness meditation on who Jesus is.",
               "john",
               ["mark", "luke", "matthew"],
-              "Mark is the fastest; John is the deepest — start where your hunger is.",
+              "All four are inspired; this course's reading tip sends the hungry straight to John — start where your hunger is.",
             ),
           ],
         },
@@ -125,11 +125,11 @@ export const bibleSurveyCourse: SeedCourse = {
               "Athanasius' Easter letter — decades before councils formalized it.",
             ),
             assist(
-              "'Canon' comes from the Greek word for a ___ (measuring stick)",
+              "'Canon' comes from the Greek word for a ___ used as a measuring stick",
               "Scripture is the rule; everything else lines up against it.",
               "reed",
-              ["ruler", "rock", "river"],
-              "Kanon = reed/ruler. The canon measures; it is not measured.",
+              ["sword", "rock", "river"],
+              "Kanon = a reed used as a measuring rod. The canon measures; it is not measured.",
             ),
             match("Match the test to its question", [
               ["Apostolic", "Did an apostle or coworker write it?"],
@@ -177,11 +177,11 @@ export const bibleSurveyCourse: SeedCourse = {
               "The gospel according to Genesis — Paul quotes it in Galatians 3:8.",
             ),
             assist(
-              "In the Passover, a ___ dies so a firstborn son lives",
+              "In the Passover, a ___ dies so a firstborn son lives (the bird offered for the poor came later, in Leviticus)",
               "Exodus 12 — the gospel in advance.",
               "lamb",
-              ["goat", "bull", "bird"],
-              "'Christ, our Passover lamb, has been sacrificed' (1 Cor 5:7).",
+              ["dove", "bull", "donkey"],
+              "Exodus 12:5 — 'from the sheep or from the goats': a flawless year-old lamb (or kid). 'Christ, our Passover lamb, has been sacrificed' (1 Cor 5:7).",
             ),
             match("Match the Genesis event to its chapter", [
               ["Creation", "Genesis 1–2"],
@@ -561,10 +561,10 @@ export const bibleSurveyCourse: SeedCourse = {
               [],
               "The map for every future read-through — you now hold it.",
             ),
-            match("Match Genesis' loss to Revelation's answer", [
+            match("Match the Genesis pattern to its Revelation fulfillment", [
               ["Tree guarded", "Tree of life freely given"],
               ["God hidden", "God dwells with His people"],
-              ["Bride taken from side", "Bride made ready for the Lamb"],
+              ["Bride widowed by sin", "Bride made ready for the Lamb"],
               ["River of Eden", "River of the water of life"],
             ]),
             assist(

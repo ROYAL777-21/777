@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query"
 import { motion, AnimatePresence } from "framer-motion"
-import { Heart, Zap, Dumbbell } from "lucide-react"
+import { Heart, Zap, Dumbbell, Crown } from "lucide-react"
 import { useAppStore } from "@/lib/client/store"
 import { sfx } from "@/lib/client/sound"
 import { haptics } from "@/lib/client/haptics"
@@ -27,14 +27,16 @@ export function HeartsModal({ open, onClose }: { open: boolean; onClose: () => v
   const refreshApp = useRefreshApp()
   const setView = useAppStore((s) => s.setView)
   const pushToast = useAppStore((s) => s.pushToast)
+  const openPaywall = useAppStore((s) => s.openPaywall)
   const [error, setError] = useState<string | null>(null)
 
   const { data: shop } = useQuery<{ gems: number; items: { slug: string; price: number; icon: string; name: string }[] }>({
     queryKey: ["shop"],
   })
-  const { data: boot } = useQuery<{ user: { hearts: number; nextHeartAt: string | null } }>({
+  const { data: boot } = useQuery<{ user: { hearts: number; nextHeartAt: string | null; isPro: boolean } }>({
     queryKey: ["bootstrap"],
   })
+  const isPro = boot?.user.isPro ?? false
 
   const refill = useMutation({
     mutationFn: () => api("/api/shop", { method: "POST", body: JSON.stringify({ slug: "heart_refill" }) }),
@@ -87,23 +89,53 @@ export function HeartsModal({ open, onClose }: { open: boolean; onClose: () => v
               </div>
             </div>
 
-            <h2 className="text-2xl font-black mb-1">You have {hearts} heart{hearts === 1 ? "" : "s"}</h2>
+            <h2 className="text-2xl font-black mb-1">
+              {isPro ? "Unlimited hearts active 👑" : `You have ${hearts} heart${hearts === 1 ? "" : "s"}`}
+            </h2>
             <p className="text-muted-foreground font-semibold mb-4">
-              Hearts refill over time — one every 10 minutes. Lose them by making mistakes in lessons;
-              practice to train them back.
+              {isPro
+                ? "Mistakes cost you nothing but a moment. Practice fearlessly — hearts never run out on Scroll Pro."
+                : "Hearts refill over time — one every 10 minutes. Lose them by making mistakes in lessons; practice to train them back."}
             </p>
+
+            {/* rest, not pressure — the one place a verse belongs here (v9) */}
+            {!isPro && hearts === 0 && (
+              <p className="text-xs font-bold text-muted-foreground/90 bg-secondary rounded-xl px-3 py-2 mb-4 leading-relaxed">
+                “Come unto me, all ye that labour and are heavy laden, and I will give you rest.” — Matthew 11:28
+              </p>
+            )}
 
             {error && <p className="text-duo-red font-bold mb-2 text-sm">{error}</p>}
 
             <div className="flex flex-col gap-2.5">
-              <button
-                disabled={refill.isPending || hearts >= 5}
-                onClick={() => refill.mutate()}
-                className="btn3d bg-duo-green text-white shadow-[0_4px_0_#46a302] py-3 px-4 flex items-center justify-center gap-2 disabled:shadow-[0_4px_0_#c9c0a4] disabled:bg-[#b7b2a0] disabled:text-white/80"
-              >
-                <Zap className="w-5 h-5" />
-                {hearts >= 5 ? "Hearts already full" : `Refill for ${price} 💎`}
-              </button>
+              {isPro ? (
+                <div className="bg-duo-gold/15 border-2 border-duo-gold/40 rounded-2xl p-3 text-sm font-extrabold text-duo-gold-dark flex items-center justify-center gap-2">
+                  <Crown className="w-5 h-5" /> Scroll Pro member — no heart limits
+                </div>
+              ) : (
+                <>
+                  <button
+                    disabled={refill.isPending || hearts >= 5}
+                    onClick={() => refill.mutate()}
+                    className="btn3d bg-duo-green text-white shadow-[0_4px_0_#46a302] py-3 px-4 flex items-center justify-center gap-2 disabled:shadow-[0_4px_0_#c9c0a4] disabled:bg-[#b7b2a0] disabled:text-white/80"
+                  >
+                    <Zap className="w-5 h-5" />
+                    {hearts >= 5 ? "Hearts already full" : `Refill for ${price} 💎`}
+                  </button>
+                  <button
+                    onClick={() => {
+                      sfx.tap()
+                      haptics.tap()
+                      onClose()
+                      openPaywall("hearts")
+                    }}
+                    className="btn3d bg-duo-gold text-[#5c4500] shadow-[0_4px_0_#d9a400] py-3 px-4 flex items-center justify-center gap-2"
+                  >
+                    <Crown className="w-5 h-5" />
+                    Go unlimited hearts with Pro
+                  </button>
+                </>
+              )}
               <button
                 onClick={() => {
                   sfx.tap()

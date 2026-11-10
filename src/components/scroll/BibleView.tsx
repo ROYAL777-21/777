@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import confetti from "canvas-confetti"
 import { BookOpen, Bookmark, CalendarCheck, ChevronLeft, ChevronRight, Sparkles, Share2, X, Check, Loader2 } from "lucide-react"
 import { BOOKS, BOOK_BY_ID, GENRE_EMOJI, READING_PLANS, PLAN_BY_ID, parseRef, refLabel, verseOfDay } from "@/lib/bible"
+import { segmentVerse, RED_VERSE_COUNT } from "@/lib/redletter"
 import { useAppStore } from "@/lib/client/store"
 import { sfx } from "@/lib/client/sound"
 import { haptics } from "@/lib/client/haptics"
@@ -18,6 +19,50 @@ const HIGHLIGHTS: { id: string; name: string; chip: string; text: string }[] = [
   { id: "teal", name: "Teal", chip: "#14B8A6", text: "#CCFBF1" },
   { id: "violet", name: "Violet", chip: "#8B5CF6", text: "#EDE9FE" },
 ]
+
+// ── red-letter rendering (words of God/Christ in red) ──────────
+
+/** the red-letter color — deep scriptural red, readable on parchment and pastel highlights alike */
+const RED_LETTER_CLASS = "text-[#B91C1C]"
+const RED_LETTER_STYLE: React.CSSProperties = { color: "#B91C1C" }
+
+/** renders one verse's text, painting the words of our Lord in red */
+function RedText({ bookId, chapter, verse, text, on }: { bookId: string; chapter: number; verse: number; text: string; on: boolean }) {
+  if (!on) return <>{text}</>
+  const segments = segmentVerse(bookId, chapter, verse, text)
+  if (segments.length === 1 && !segments[0].red) return <>{text}</>
+  return (
+    <>
+      {segments.map((s, i) =>
+        s.red ? (
+          <span key={i} className={RED_LETTER_CLASS} style={RED_LETTER_STYLE}>
+            {s.text}
+          </span>
+        ) : (
+          <span key={i}>{s.text}</span>
+        ),
+      )}
+    </>
+  )
+}
+
+/** shared red-letter preference: hydrate from the server, toggle locally,
+ *  persist through /api/settings. Default ON (the classic edition). */
+function useRedLetter(state?: BibleStatePayload) {
+  const [override, setOverride] = useState<boolean | null>(null)
+  const on = override ?? state?.redLetterOn ?? true
+  const toggle = () => {
+    const next = !on
+    setOverride(next)
+    sfx.tap()
+    void fetch("/api/settings", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ redLetterOn: next }),
+    }).catch(() => setOverride(!next))
+  }
+  return { on, toggle }
+}
 
 type Tab = "read" | "plans" | "marks"
 
@@ -107,6 +152,7 @@ function ReadTab() {
 function TodayCard({ state }: { state?: BibleStatePayload }) {
   const dayKey = new Date().toISOString().slice(0, 10)
   const vod = useMemo(() => verseOfDay(dayKey), [dayKey])
+  const { on: redOn } = useRedLetter(state)
   const setShareDraft = useAppStore((s) => s.setShareDraft)
   const setView = useAppStore((s) => s.setView)
   const [verse, setVerse] = useState<string | null>(null)
@@ -135,7 +181,15 @@ function TodayCard({ state }: { state?: BibleStatePayload }) {
         <span className="text-xs font-black uppercase tracking-wider text-muted-foreground">Verse of the day</span>
       </div>
       <blockquote className="text-lg font-extrabold leading-snug">
-        {verse === null ? "Loading today's bread…" : `"${verse}"`}
+        {verse === null ? (
+          "Loading today's bread…"
+        ) : (
+          <>
+            "
+            <RedText bookId={vod.bookId} chapter={vod.chapter} verse={vod.verse} text={verse} on={redOn} />
+            "
+          </>
+        )}
       </blockquote>
       <p className="text-sm font-black text-duo-purple mt-2">{vod.ref.toUpperCase()}</p>
       <div className="flex gap-2 mt-3">
@@ -314,6 +368,7 @@ function ChapterReader({
     staleTime: Infinity,
   })
   const { data: state } = useQuery<BibleStatePayload>({ queryKey: ["bible"] })
+  const { on: redOn, toggle: toggleRed } = useRedLetter(state)
 
   const verses = chapterData?.chapters[chapter - 1] ?? []
   const marksByVerse = useMemo(() => {
@@ -387,18 +442,28 @@ function ChapterReader({
               {GENRE_EMOJI[book.genre]} {book.genre} · {book.summary}
             </p>
           </div>
+          <button
+            onClick={toggleRed}
+            className={`ml-auto btn3d px-3 py-2 text-xs flex items-center gap-1.5 shrink-0 border-2 ${
+              redOn ? "bg-[#B91C1C] text-white shadow-[0_3px_0_#7f0f0f]" : "bg-white border-paper-border text-muted-foreground"
+            }`}
+            title={redOn ? `Red-letter edition on — the words of God and of Christ in red (${RED_VERSE_COUNT.toLocaleString()} verses)` : "Red-letter edition off"}
+            aria-pressed={redOn}
+          >
+            <span aria-hidden>✝️</span> <span className="hidden sm:inline">{redOn ? "Red words on" : "Red words off"}</span>
+          </button>
           {!alreadyRead && (
             <button
               onClick={() => markRead.mutate()}
               disabled={markRead.isPending}
-              className="btn3d ml-auto bg-duo-green text-white shadow-[0_3px_0_#46a302] px-3 py-2 text-xs flex items-center gap-1.5 shrink-0"
+              className="btn3d bg-duo-green text-white shadow-[0_3px_0_#46a302] px-3 py-2 text-xs flex items-center gap-1.5 shrink-0 ml-1"
             >
               {markRead.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
               Read +10 XP
             </button>
           )}
           {alreadyRead && (
-            <span className="ml-auto flex items-center gap-1 text-xs font-black text-duo-green-dark bg-duo-green/10 rounded-full px-3 py-1.5 shrink-0">
+            <span className="flex items-center gap-1 text-xs font-black text-duo-green-dark bg-duo-green/10 rounded-full px-3 py-1.5 shrink-0 ml-1">
               <Check className="w-4 h-4" /> Read
             </span>
           )}
@@ -469,7 +534,7 @@ function ChapterReader({
                     aria-label={`Verse ${i + 1}`}
                   >
                     <sup className="text-duo-purple font-black text-[11px] mr-0.5 select-none">{i + 1}</sup>
-                    {v}
+                    <RedText bookId={bookId} chapter={chapter} verse={i + 1} text={v} on={redOn} />
                   </span>{" "}
                   {selectedVerse === i + 1 && (
                     <span className="inline-flex align-middle gap-1 ml-1 bg-white border-2 border-paper-border rounded-full shadow-[0_3px_0_#e8e0c8] px-1.5 py-1">

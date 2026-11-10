@@ -13,9 +13,15 @@ const BOT_REPLIES = [
 
 export async function POST(req: Request) {
   try {
+    const len = Number(req.headers.get("content-length") ?? 0)
+    if (Number.isFinite(len) && len > 20_000) return NextResponse.json({ error: "payload too large" }, { status: 413 })
     const { postId, body } = (await req.json()) as { postId?: string; body?: string }
     if (!postId || !body?.trim()) return NextResponse.json({ error: "bad request" }, { status: 400 })
     const user = await getOrCreateUser()
+    // blue-team: rate limit — at most 30 comments per hour
+    const hourAgo = new Date(Date.now() - 3600_000)
+    const recentComments = await db.postComment.count({ where: { userId: user.id, createdAt: { gte: hourAgo } } })
+    if (recentComments >= 30) return NextResponse.json({ error: "too many comments" }, { status: 429 })
     const post = await db.post.findUnique({ where: { id: postId } })
     if (!post) return NextResponse.json({ error: "not found" }, { status: 404 })
 

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { getOrCreateUser, ensureLeagueState, botDisplayXp, weekElapsed, weekKey, PROMOTION_SLOTS, DEMOTION_SLOTS } from "@/lib/gamification"
+import { TZ_OFFSET_MS } from "@/lib/time"
 import type { LeaderboardPayload } from "@/lib/types"
 
 export async function GET() {
@@ -63,9 +64,9 @@ export async function GET() {
     }))
 
     const league = leaguesAll[order]
-    // time until next Monday 00:00 (UTC+8)
+    // time until next Monday 00:00 (local)
     const now = new Date()
-    const local = new Date(now.getTime() + 8 * 3600 * 1000)
+    const local = new Date(now.getTime() + TZ_OFFSET_MS)
     const day = local.getUTCDay() || 7
     const msUntilMonday = (8 - day) * 86400000 - (local.getUTCHours() * 3600 + local.getUTCMinutes() * 60 + local.getUTCSeconds()) * 1000
 

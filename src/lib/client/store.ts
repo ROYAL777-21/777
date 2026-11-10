@@ -18,6 +18,7 @@ export type View =
   | "avatar"
   | "courses"
   | "growth"
+  | "admin"
 
 interface LessonSession {
   lessonId: string // "practice" for practice sessions
@@ -44,6 +45,8 @@ interface AppState {
   shareDraft: ShareDraft
   /** open the bible reader at a specific chapter (e.g. from a reading plan) */
   bibleTarget: { bookId: string; chapter: number } | null
+  /** Scroll Pro paywall sheet */
+  paywall: { context: "onboarding" | "hearts" | "shop" | "profile" | "lessonEnd" | "gift" | "general" } | null
   setView: (v: View) => void
   startLesson: (lessonId: string, title: string) => void
   endLesson: () => void
@@ -58,6 +61,8 @@ interface AppState {
   setShareDraft: (d: ShareDraft) => void
   openBible: (bookId: string, chapter: number) => void
   clearBibleTarget: () => void
+  openPaywall: (context: "onboarding" | "hearts" | "shop" | "profile" | "lessonEnd" | "gift" | "general") => void
+  closePaywall: () => void
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -70,6 +75,7 @@ export const useAppStore = create<AppState>((set) => ({
   toastQueue: [],
   shareDraft: null,
   bibleTarget: null,
+  paywall: null,
   setView: (v) => set({ view: v }),
   startLesson: (lessonId, title) => set({ inLesson: { lessonId, title } }),
   endLesson: () => set({ inLesson: null }),
@@ -91,6 +97,8 @@ export const useAppStore = create<AppState>((set) => ({
   setShareDraft: (d) => set({ shareDraft: d }),
   openBible: (bookId, chapter) => set({ view: "bible", bibleTarget: { bookId, chapter } }),
   clearBibleTarget: () => set({ bibleTarget: null }),
+  openPaywall: (context) => set({ paywall: { context } }),
+  closePaywall: () => set({ paywall: null }),
 }))
 
 /** normalize typed answers client-side (mirrors server) */

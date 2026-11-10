@@ -4,13 +4,16 @@ import { useState } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { motion } from "framer-motion"
 import { AVATAR_PRESETS } from "@/lib/avatar"
+import { courseCategory, CATEGORY_META, type CourseCategory } from "@/lib/courseMeta"
 import { sfx } from "@/lib/client/sound"
 import { haptics } from "@/lib/client/haptics"
 import type { CourseSummary } from "@/lib/types"
 import { AvatarSvg } from "./AvatarSvg"
 import { Mascot } from "./Mascot"
+import { useAppStore } from "@/lib/client/store"
 
 const AVATARS = ["🦁", "🕊️", "🐑", "🦉", "🐉", "🌟", "🕎", "🛡️", "📜", "👑", "🌾", "🐟"]
+const CATEGORY_ORDER: CourseCategory[] = ["language", "study", "denomination"]
 
 export function Onboarding({ courses }: { courses: CourseSummary[] }) {
   const qc = useQueryClient()
@@ -50,6 +53,9 @@ export function Onboarding({ courses }: { courses: CourseSummary[] }) {
     haptics.complete()
     saveProfile.mutate()
     if (picked) selectCourse.mutate(picked)
+    // Hormozi: the best upgrade moment is right after the first win —
+    // offer the 7-day trial as onboarding's final step
+    setTimeout(() => useAppStore.getState().openPaywall("onboarding"), 500)
   }
 
   return (
@@ -78,8 +84,8 @@ export function Onboarding({ courses }: { courses: CourseSummary[] }) {
               Welcome to Scroll <span className="text-duo-green">Academy</span>
             </h1>
             <p className="text-lg font-bold text-muted-foreground mb-8">
-              Learn the Bible in its own languages — Greek, Hebrew, the whole Book, manuscripts & apologetics —
-              with streaks, hearts and leagues that keep you coming back daily.
+              Learn the Bible in its own languages — Greek, Hebrew, the whole Book, apologetics and the great
+              denominations — with streaks, hearts and leagues that keep you coming back daily.
             </p>
             <button
               className="btn3d bg-duo-green text-white shadow-[0_5px_0_#46a302] text-lg py-4 px-10"
@@ -98,37 +104,51 @@ export function Onboarding({ courses }: { courses: CourseSummary[] }) {
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
             <h2 className="text-2xl font-black mb-1">What do you want to learn?</h2>
             <p className="font-bold text-muted-foreground mb-6">Pick your first course — you can add more anytime.</p>
-            <div className="grid gap-3 sm:grid-cols-2 mb-8">
-              {courses.map((c, i) => {
-                const active = picked === c.id
+            <div className="max-h-[46vh] overflow-y-auto pr-1 -mx-1 px-1 mb-6 flex flex-col gap-4 text-left">
+              {CATEGORY_ORDER.map((cat) => {
+                const list = courses.filter((c) => courseCategory(c.code) === cat)
+                if (list.length === 0) return null
+                const meta = CATEGORY_META[cat]
                 return (
-                  <motion.button
-                    key={c.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.08 }}
-                    whileTap={{ scale: 0.97 }}
-                    onClick={() => {
-                      sfx.tap()
-                      haptics.tap()
-                      setPicked(c.id)
-                    }}
-                    className={`text-left rounded-2xl border-2 p-4 bg-white flex gap-3 items-center transition-all ${
-                      active ? "border-duo-green shadow-[0_4px_0_#58cc0a66]" : "border-paper-border shadow-[0_4px_0_#e8e0c8] hover:border-muted-foreground/40"
-                    }`}
-                  >
-                    <span
-                      className="w-12 h-12 rounded-2xl grid place-items-center text-2xl shrink-0"
-                      style={{ backgroundColor: c.color + "22" }}
-                    >
-                      {c.emoji}
-                    </span>
-                    <span className="min-w-0">
-                      <span className="block font-black">{c.title}</span>
-                      <span className="block text-sm text-muted-foreground font-semibold leading-snug">{c.subtitle}</span>
-                    </span>
-                    {active && <span className="ml-auto text-duo-green text-xl">✓</span>}
-                  </motion.button>
+                  <div key={cat}>
+                    <p className="text-[11px] font-black uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5">
+                      <span>{meta.emoji}</span> {meta.label}
+                    </p>
+                    <div className="grid gap-2.5 sm:grid-cols-2">
+                      {list.map((c, i) => {
+                        const active = picked === c.id
+                        return (
+                          <motion.button
+                            key={c.id}
+                            initial={{ opacity: 0, y: 14 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: i * 0.04 }}
+                            whileTap={{ scale: 0.97 }}
+                            onClick={() => {
+                              sfx.tap()
+                              haptics.tap()
+                              setPicked(c.id)
+                            }}
+                            className={`text-left rounded-2xl border-2 p-3.5 bg-white flex gap-3 items-center transition-all ${
+                              active ? "border-duo-green shadow-[0_4px_0_#58cc0a66]" : "border-paper-border shadow-[0_4px_0_#e8e0c8] hover:border-muted-foreground/40"
+                            }`}
+                          >
+                            <span
+                              className="w-11 h-11 rounded-2xl grid place-items-center text-2xl shrink-0"
+                              style={{ backgroundColor: c.color + "22" }}
+                            >
+                              {c.emoji}
+                            </span>
+                            <span className="min-w-0">
+                              <span className="block font-black text-sm leading-tight">{c.title}</span>
+                              <span className="block text-xs text-muted-foreground font-semibold leading-snug line-clamp-2">{c.subtitle}</span>
+                            </span>
+                            {active && <span className="ml-auto text-duo-green text-xl shrink-0">✓</span>}
+                          </motion.button>
+                        )
+                      })}
+                    </div>
+                  </div>
                 )
               })}
             </div>
@@ -167,7 +187,7 @@ export function Onboarding({ courses }: { courses: CourseSummary[] }) {
                 maxLength={24}
                 className="w-full bg-secondary border-2 border-paper-border rounded-xl px-4 py-3 font-extrabold focus:outline-none focus:border-duo-green"
               />
-              <p className="block text-left font-extrabold text-sm mt-4 mb-2">Pick your study self (customise later — crucifixes, crowns & outfits!)</p>
+              <p className="block text-left font-extrabold text-sm mt-4 mb-2">Pick your study self (customise later — robes, crowns & outfits!)</p>
               <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-4">
                 {AVATAR_PRESETS.map((p) => {
                   const active = avatarCfg.label === p.label

@@ -7,11 +7,19 @@ import {
   updateStreak,
   advanceQuests,
   checkAchievements,
-  notifyQuestsAndAchievements,
   dayKey,
   weekKey,
+  weekElapsed,
+  botDisplayXp,
+  PROMOTION_SLOTS,
   MAX_HEARTS,
 } from "@/lib/gamification"
+import { sendMilestoneEmail, localTime } from "@/lib/journeys"
+import { tap } from "@/lib/engine/events"
+import { catchUpMultiplier } from "@/lib/engine/xp"
+import { getGameConfigQuick } from "@/lib/engine/compute"
+import { computeFeatures } from "@/lib/engine/features"
+import { computeScores } from "@/lib/engine/scores"
 import type { CompleteResult } from "@/lib/types"
 
 interface AnswerDTO {
@@ -31,6 +39,16 @@ function normalize(s: string): string {
     .replace(/[!]/g, "")
 }
 
+/** small stable hash — drives the rare "extra manna fell" surprise */
+function hashStr(s: string): number {
+  let h = 2166136261
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i)
+    h = Math.imul(h, 16777619)
+  }
+  return Math.abs(h)
+}
+
 export async function POST(req: Request, ctx: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await ctx.params
@@ -45,9 +63,13 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
 
     const lesson = await db.lesson.findUnique({
       where: { id },
-      include: { challenges: { include: { options: true } } },
+      include: {
+        unit: { select: { difficulty: true, courseId: true } },
+        challenges: { include: { options: true } },
+      },
     })
     if (!lesson) return NextResponse.json({ error: "lesson not found" }, { status: 404 })
+    const unitDifficulty = lesson.unit.difficulty ?? 1
 
     // ── server-side verification ──
     const byId = new Map(lesson.challenges.map((c) => [c.id, c]))
@@ -82,12 +104,47 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
     })
     const firstTime = !existing
 
-    // ── XP math ──
-    const baseXp = 15
-    let bonusXp = (firstTime ? 10 : 5) + (perfect ? 5 : 0) + (comboMax >= 5 ? 5 : 0)
-    const doubled = !!progress.doubleXpUntil && progress.doubleXpUntil > new Date()
-    const xpEarned = Math.round((baseXp + bonusXp) * (doubled ? 2 : 1))
-    const gemsEarned = 12 + (perfect ? 5 : 0)
+    // ── XP math (progressive difficulty: harder units pay more) ──
+    // difficulty 1 Foundations → 15 base · 2 Growing → 20 · 3 Advanced → 25
+    const baseXp = 10 + unitDifficulty * 5
+    let bonusXp = (firstTime ? 10 : 5) + (perfect ? 5 : 0) + (comboMax >= 5 ? 5 : 0) + (unitDifficulty >= 3 ? 5 : 0)
+    // Scroll Pro — 2× XP weekends: every Saturday & Sunday (local, UTC+8) Pro members earn double XP
+    const isPro = progress.plan !== "free"
+    const isWeekend = localTime().dow === 0 || localTime().dow === 6
+    const weekendDouble = isPro && isWeekend
+    const doubled = (!!progress.doubleXpUntil && progress.doubleXpUntil > new Date()) || weekendDouble
+    // the Scribe's Ledger: returning learners get a gentle catch-up multiplier
+    // (1.0–1.25×) — it NEVER stacks with Double XP (fairness rule)
+    let catchUp = 1
+    try {
+      const lastCompletion = await db.lessonCompletion.findFirst({
+        where: { userId: USER_ID },
+        orderBy: { completedAt: "desc" },
+        select: { completedAt: true },
+      })
+      if (lastCompletion) {
+        const daysSince = Math.max(0, (Date.now() - lastCompletion.completedAt.getTime()) / 86400000)
+        const fr = await computeFeatures(USER_ID)
+        const scores = await computeScores(fr, USER_ID)
+        const cfg = await getGameConfigQuick(USER_ID)
+        catchUp = typeof cfg["xp.personal_multiplier"] === "number" && Number.isFinite(cfg["xp.personal_multiplier"])
+          ? Math.max(1, Math.min(1.25, cfg["xp.personal_multiplier"] as number))
+          : catchUpMultiplier(daysSince, scores.engagement)
+        if (doubled) catchUp = 1 // never stack
+      }
+    } catch {
+      catchUp = 1 // engine failure must never break XP math
+    }
+    const xpEarned = Math.round((baseXp + bonusXp) * (doubled ? 2 : catchUp))
+    const gemsEarned = 10 + unitDifficulty * 2 + (perfect ? 5 : 0)
+
+    // ── v11.5 · the craving machine's controlled surprise ──
+    // A rare "extra manna fell on this lesson" bonus (+5–15 XP), first-run
+    // lessons only, deterministic per (lesson, day) so it can never be farmed
+    // by replays. The reward system stays predictable with moments of grace.
+    const mannaRoll = hashStr(`${id}|${dayKey()}|manna`)
+    const mannaBonus = firstTime && mannaRoll % 100 < 12 ? 5 + (mannaRoll % 11) : null
+    const xpWithBonus = xpEarned + (mannaBonus ?? 0)
 
     // ── record challenge progress (for mistakes review) ──
     for (const a of verified) {
@@ -98,19 +155,38 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
       })
     }
 
+    // ── v11.5 · personal bests (competence signals, computed BEFORE the upsert) ──
+    // Records compare this run against the learner's own history — evidence
+    // of skill, not attendance (the anti-badge-theater rule).
+    const records: string[] = []
+    if (!firstTime && durationSec >= 10 && existing?.durationSec && durationSec < existing.durationSec) {
+      records.push(`Fastest run — ${durationSec}s (was ${existing.durationSec}s)`)
+    }
+    if (comboMax >= 5) {
+      const bestCombo = await db.lessonCompletion.findFirst({
+        where: { userId: USER_ID },
+        orderBy: { comboMax: "desc" },
+        select: { comboMax: true },
+      })
+      if (comboMax > (bestCombo?.comboMax ?? 0)) records.push(`Longest combo ever — ${comboMax} in a row`)
+    }
+
     // ── upsert lesson completion ──
     const accuracy = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 100
     await db.lessonCompletion.upsert({
       where: { userId_lessonId: { userId: USER_ID, lessonId: id } },
       update: {
-        xpEarned: Math.max(existing?.xpEarned ?? 0, xpEarned),
+        xpEarned: Math.max(existing?.xpEarned ?? 0, xpWithBonus),
         comboMax: Math.max(existing?.comboMax ?? 0, comboMax),
         accuracy: Math.max(existing?.accuracy ?? 0, accuracy),
         durationSec,
         completedAt: new Date(),
       },
-      create: { userId: USER_ID, lessonId: id, xpEarned, comboMax, accuracy, durationSec },
+      create: { userId: USER_ID, lessonId: id, xpEarned: xpWithBonus, comboMax, accuracy, durationSec },
     })
+
+    // ── the Scribe's Ledger: completion tap ──
+    void tap(USER_ID, "lesson_complete", { lessonId: id, accuracy, courseId: lesson.unit.courseId, difficulty: unitDifficulty, firstTime })
 
     // ── streak ──
     const streakRes = await updateStreak(progress)
@@ -118,7 +194,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
     // ── quests ──
     const today = dayKey()
     const questRes = await advanceQuests(today, {
-      xp: xpEarned,
+      xp: xpWithBonus,
       lessons: 1,
       combo: comboMax,
       perfect: perfect ? 1 : 0,
@@ -130,26 +206,62 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
     const wk = weekKey()
     await db.leagueEntry.updateMany({
       where: { leagueId, weekKey: wk, isCurrentUser: true },
-      data: { xp: { increment: xpEarned }, displayName: user.name, avatarEmoji: user.image },
+      data: { xp: { increment: xpWithBonus }, displayName: user.name, avatarEmoji: user.image },
     })
     // ensure the user's entry exists even if leaderboard wasn't opened yet
     const meCount = await db.leagueEntry.count({ where: { leagueId, weekKey: wk, isCurrentUser: true } })
     if (meCount === 0) {
       await db.leagueEntry.create({
-        data: { leagueId, weekKey: wk, displayName: user.name, avatarEmoji: user.image, isCurrentUser: true, xp: xpEarned },
+        data: { leagueId, weekKey: wk, displayName: user.name, avatarEmoji: user.image, isCurrentUser: true, xp: xpWithBonus },
       })
+    }
+
+    // ── v11.5 · the invisible scoreboard at the moment of completion ──
+    // Where do you stand now, how far did this lesson move you, and who is
+    // one catchable lesson away? (Localized cohort — the league IS small.)
+    let league: CompleteResult["league"] = null
+    try {
+      const entries = await db.leagueEntry.findMany({ where: { leagueId, weekKey: wk } })
+      const elapsed = weekElapsed()
+      const ranked = entries
+        .map((e) => ({
+          name: e.displayName,
+          isMe: e.isCurrentUser,
+          xp: e.isCurrentUser
+            ? e.xp
+            : e.isBot
+              ? botDisplayXp(e.targetXp ?? 0, e.displayName, elapsed)
+              : e.xp,
+        }))
+        .sort((a, b) => b.xp - a.xp || (a.isMe ? -1 : 1))
+      const rankAfter = ranked.findIndex((r) => r.isMe)
+      if (rankAfter >= 0) {
+        const rankBefore = [...ranked]
+          .map((r) => ({ ...r, xp: r.isMe ? r.xp - xpWithBonus : r.xp }))
+          .sort((a, b) => b.xp - a.xp || (a.isMe ? -1 : 1))
+          .findIndex((r) => r.isMe)
+        const above = rankAfter > 0 ? ranked[rankAfter - 1] : null
+        league = {
+          rank: rankAfter + 1,
+          moved: Math.max(-5, Math.min(5, rankBefore - rankAfter)),
+          nextUp: above ? { name: above.name, gap: Math.max(1, above.xp - ranked[rankAfter].xp) } : null,
+          promotionZone: PROMOTION_SLOTS,
+        }
+      }
+    } catch {
+      league = null // standings must never break the completion flow
     }
 
     // ── daily xp ──
     const isNewDay = progress.dailyXpDay !== today
-    const dailyXp = (isNewDay ? 0 : progress.dailyXp) + xpEarned
+    const dailyXp = (isNewDay ? 0 : progress.dailyXp) + xpWithBonus
 
     // ── totals ──
-    const totalXp = progress.xp + xpEarned
+    const totalXp = progress.xp + xpWithBonus
     const totalGems = progress.gems + gemsEarned + questRes.gemsAwarded
 
-    // ── hearts: sync from lesson session ──
-    const hearts = Math.max(0, Math.min(MAX_HEARTS, body.hearts ?? progress.hearts))
+    // ── hearts: sync from lesson session (Scroll Pro keeps them full) ──
+    const hearts = progress.plan !== "free" ? MAX_HEARTS : Math.max(0, Math.min(MAX_HEARTS, body.hearts ?? progress.hearts))
 
     const lessonsDone = await db.lessonCompletion.count({ where: { userId: USER_ID } })
     const perfectDone = await db.lessonCompletion.count({ where: { userId: USER_ID, accuracy: 100 } })
@@ -207,6 +319,22 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
       })
     }
 
+    // ── milestone emails (streak milestones · level ups · course completion) ──
+    if (streakRes.milestone) void sendMilestoneEmail("streak_milestone", String(streakRes.milestone)).catch(() => undefined)
+    const lv = Math.floor(totalXp / 100)
+    const prevLv = Math.floor(progress.xp / 100)
+    if (lv > prevLv && lv > 0) void sendMilestoneEmail("level_up", String(lv + 1)).catch(() => undefined)
+    {
+      const courseLessons = await db.lesson.count({ where: { unit: { courseId: lesson.unit.courseId } } })
+      const doneInCourse = await db.lessonCompletion.count({
+        where: { userId: USER_ID, lesson: { unit: { courseId: lesson.unit.courseId } } },
+      })
+      if (courseLessons > 0 && doneInCourse >= courseLessons && !existing) {
+        const course = await db.course.findUnique({ where: { id: lesson.unit.courseId }, select: { title: true } })
+        void sendMilestoneEmail("course_complete", course?.title ?? "a course").catch(() => undefined)
+      }
+    }
+
     // ── persist user progress ──
     progress = await db.userProgress.update({
       where: { userId: USER_ID },
@@ -224,7 +352,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
     })
 
     const result: CompleteResult = {
-      xpEarned,
+      xpEarned: xpWithBonus,
       baseXp,
       bonusXp,
       doubled,
@@ -241,9 +369,13 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
       gems: totalGems,
       hearts,
       dailyXp,
-      dailyXpGoal: 50,
+      dailyXpGoal: progress.dailyGoal ?? 50,
       correctCount,
       totalQuestions,
+      durationSec,
+      mannaBonus,
+      records,
+      league,
     }
     return NextResponse.json(result)
   } catch (e) {
