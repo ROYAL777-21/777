@@ -109,7 +109,7 @@ export const manuscriptsCourse: SeedCourse = {
           challenges: [
             info(
               "Guardians of the text",
-              "Professional scribes (Hebrew: sopherim, 'counters') copied Scripture with extraordinary care. The Masoretes of Tiberias (about AD 500–1000) went further: they counted every letter, every word, every verse, and recorded the totals in the margins — the Masorah. Their masterpiece? The Aleppo Codex and its sibling, the Leningrad Codex — the oldest complete Hebrew Bibles.",
+              "Professional scribes (Hebrew: sopherim, 'counters') copied Scripture with extraordinary care. The Masoretes of Tiberias (about AD 500–1000) went further: they counted every letter, every word, every verse, and recorded the totals in the margins — the Masorah. Their masterpieces? The Aleppo Codex — once complete, now partially lost to fire — and the Leningrad Codex, the oldest complete Hebrew Bible.",
             ),
             sel(
               "What did the Masoretes famously COUNT?",
@@ -143,7 +143,7 @@ export const manuscriptsCourse: SeedCourse = {
               "🐔 Careful — one answer",
               "The Masoretes (AD 500–1000)",
               ["Moses", "The apostles", "Ezra"],
-              "The Masoretes added nikud so pronunciation would never be lost. Jewish tradition calls them the fence around the Torah!",
+              "The Masoretes added nikud so pronunciation would never be lost. Their counts and checks built a hedge so the text could never drift.",
             ),
           ],
         },
@@ -160,14 +160,14 @@ export const manuscriptsCourse: SeedCourse = {
           challenges: [
             info(
               "The discovery at Mount Sinai",
-              "In 1844, scholar Constantin von Tischendorf visited St. Catherine's Monastery at the foot of Mount Sinai — and found ancient parchment pages earmarked for the stove! Over several trips (1844–1859), he rescued what became Codex Sinaiticus: one of the two oldest complete Bibles in the world.",
+              "In 1844, scholar Constantin von Tischendorf visited St. Catherine's Monastery at the foot of Mount Sinai — and found ancient parchment pages earmarked for the stove! Over several trips (1844–1859), he rescued what became Codex Sinaiticus: the oldest complete New Testament and one of the two oldest near-complete Bibles in the world.",
             ),
             sel(
               "Who discovered Codex Sinaiticus?",
               "🔍 Name the scholar",
               "Constantin von Tischendorf",
               ["Robert Estienne", "Desiderius Erasmus", "Brooke Westcott"],
-              "Tischendorf — who called the monastery pages 'the greatest find of the age'!"
+              "Tischendorf — who called the pages 'the crown of all discoveries in the field of textual criticism'!"
             ),
             sel(
               "Where was Sinaiticus discovered?",
@@ -178,7 +178,7 @@ export const manuscriptsCourse: SeedCourse = {
             ),
             info(
               "What's inside",
-              "Sinaiticus (mid-4th century, ~AD 330–360) contains the complete New Testament in Greek — plus the Epistle of Barnabas and part of the Shepherd of Hermas, books the church later did not include in the canon. Written in neat uncials (capital letters), four columns per page, on fine parchment.",
+              "Sinaiticus (mid-4th century, ~AD 330–360) contains the complete New Testament in Greek — plus the Epistle of Barnabas and part of the Shepherd of Hermas, books the church later did not include in the canon. Written in neat uncials (capital letters), four columns per page in the Old Testament and two in the New Testament, on fine parchment.",
             ),
             sel(
               "Roughly when was Sinaiticus written?",
@@ -426,7 +426,7 @@ export const manuscriptsCourse: SeedCourse = {
             ),
             info(
               "🎉 Unit complete!",
-              "You now know the story modern museums tell: a shepherd's stone, a monk's rescue, and a millennium of faithful copying. Next stop: how scholars weigh these witnesses — textual criticism!",
+              "You now know the story modern museums tell: a shepherd's stone, jars of linen-wrapped scrolls, and a millennium of faithful copying. Next stop: how scholars weigh these witnesses — textual criticism!",
             ),
           ],
         },

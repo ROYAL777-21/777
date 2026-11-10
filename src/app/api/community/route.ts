@@ -113,16 +113,37 @@ export async function GET(req: Request) {
   }
 }
 
+const POST_KINDS = new Set(["achievement", "streak", "verse", "plan", "course"])
+
+/** blue-team: validate the attachment card shape before storing */
+function safeAttachment(a: unknown): PostAttachment | null {
+  if (!a || typeof a !== "object" || Array.isArray(a)) return null
+  const o = a as Record<string, unknown>
+  if (typeof o.kind !== "string" || !POST_KINDS.has(o.kind)) return null
+  const title = typeof o.title === "string" ? o.title.slice(0, 60) : ""
+  const subtitle = typeof o.subtitle === "string" ? o.subtitle.slice(0, 160) : ""
+  const icon = typeof o.icon === "string" ? o.icon.slice(0, 8) : "📖"
+  const color = typeof o.color === "string" && /^#[0-9a-fA-F]{3,8}$/.test(o.color) ? o.color : "#0F8A80"
+  return { kind: o.kind as PostAttachment["kind"], title, subtitle, icon, color }
+}
+
 export async function POST(req: Request) {
   try {
+    // blue-team: reject oversized request bodies up front
+    const len = Number(req.headers.get("content-length") ?? 0)
+    if (Number.isFinite(len) && len > 100_000) return NextResponse.json({ error: "payload too large" }, { status: 413 })
     const { body, attachment } = (await req.json()) as { body?: string; attachment?: PostAttachment | null }
     if (!body || !body.trim()) return NextResponse.json({ error: "empty post" }, { status: 400 })
     const user = await getOrCreateUser()
+    // blue-team: rate limit — at most 10 posts per hour (flood protection)
+    const hourAgo = new Date(Date.now() - 3600_000)
+    const recentPosts = await db.post.count({ where: { userId: USER_ID, createdAt: { gte: hourAgo } } })
+    if (recentPosts >= 10) return NextResponse.json({ error: "too many posts — rest a moment" }, { status: 429 })
     const created = await db.post.create({
       data: {
         userId: user.id,
         body: body.trim().slice(0, 600),
-        attachment: attachment ? JSON.stringify(attachment) : null,
+        attachment: attachment ? JSON.stringify(safeAttachment(attachment)) : null,
       },
     })
 

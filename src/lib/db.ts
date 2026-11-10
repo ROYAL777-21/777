@@ -8,7 +8,7 @@ const globalForPrisma = globalThis as unknown as {
   prismaGenVersion: string | undefined
 }
 
-const GEN_VERSION = 'gen-2026-10-30-dailyquiz'
+const GEN_VERSION = 'gen-2026-11-08-referral2'
 
 export const db =
   globalForPrisma.prisma && globalForPrisma.prismaGenVersion === GEN_VERSION

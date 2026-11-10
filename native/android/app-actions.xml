@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  app-actions.xml — native Google Assistant / Gemini integration (v11)
+
+  Drop into the Android app (res/xml/app_actions.xml) when the store
+  build wraps the web app. Until then, Assistant routines + the PWA
+  long-press shortcuts work today (Profile → "Use Papy with Siri &
+  your assistant").
+
+  Binds two built-in intents and one custom intent to the app's
+  scroll:// deep-link scheme (same bridge as the web: ?assistant=1&q=).
+-->
+<actions>
+    <!-- "Hey Google, open my streak on Scroll Academy" -->
+    <action intentName="actions.intent.OPEN_APP_FEATURE">
+        <parameter name="feature" android:key="feature">
+            <slice-allowable-slices />
+        </parameter>
+        <fulfillment urlTemplate="scroll://open{#feature}">
+            <parameter-mapping
+                urlParameter="feature"
+                intentParameter="feature"
+                required="false" />
+        </fulfillment>
+    </action>
+
+    <!-- "Hey Google, ask Scroll Academy to read John 3" -->
+    <action intentName="actions.intent.OPEN_URL">
+        <fulfillment urlTemplate="scroll://open?assistant=1{&amp;q}">
+            <parameter-mapping
+                urlParameter="q"
+                intentParameter="url.url"
+                required="false" />
+        </fulfillment>
+    </action>
+
+    <!-- custom intent: a plain "Ask Papy" voice entry point -->
+    <custom-action intent-name="custom.actions.app.scrollacademy.ASK_PAPY">
+        <fulfillment urlTemplate="scroll://open?assistant=1" />
+    </custom-action>
+</actions>

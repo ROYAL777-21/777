@@ -216,7 +216,7 @@ export const worldviewsCourse: SeedCourse = {
           challenges: [
             info(
               "Messiah: what Israel was waiting for",
-              "Mashiach means 'Anointed One' — the king God promised who would restore Israel and the world. Key texts Jewish and Christian readers both weigh: Isaiah 53 (the suffering Servant), Psalm 22 (pierced hands and feet imagery, casting lots for garments), Micah 5:2 (ruler from Bethlehem), Daniel 9 (anointed one cut off), Isaiah 9:6-7 (child called Mighty God).",
+              "Mashiach means 'Anointed One' — the king God promised who would restore Israel and the world. Key texts Jewish and Christian readers both weigh: Isaiah 53 (the suffering Servant), Psalm 22 (hands and feet — a verse whose Hebrew both sides read differently — and garments divided by lot), Micah 5:2 (ruler from Bethlehem), Daniel 9 (anointed one cut off), Isaiah 9:6-7 (child called Mighty God).",
             ),
             info(
               "How the conversation usually goes",
@@ -248,10 +248,10 @@ export const worldviewsCourse: SeedCourse = {
               "Knowing the alternative reading honestly makes your conversation respectful instead of strawmanned.",
             ),
             typeAns(
-              "Which Gospel reports the casting of lots for Jesus' garments at the cross (echoing Psalm 22)?",
+              "Which Gospel explicitly quotes the casting of lots for Jesus' garments as a fulfillment of Psalm 22?",
               "john",
-              ["john", "the gospel of john", "gospel of john"],
-              "John 19:23-24 explicitly cites the detail — a thread you can pull in study.",
+              ["john", "the gospel of john", "gospel of john", "matthew", "the gospel of matthew", "gospel of matthew"],
+              "John 19:23-24 explicitly cites the detail. In the KJV, Matthew 27:35 names the Scripture too — modern critical texts reserve the explicit citation for John. All four Gospels report the event.",
             ),
           ],
         },
@@ -264,7 +264,7 @@ export const worldviewsCourse: SeedCourse = {
             ),
             info(
               "Where the road forks",
-              "1) Is Jesus the promised Messiah and divine Son? 2) Is God a Trinity — one Being, three Persons? 3) How is sin atoned — Temple sacrifice (awaited restoration), or the cross as the final sacrifice (Hebrews 10)? 4) What is the new covenant of Jeremiah 31? Christians answer: Jesus fulfils all four (Matt 5:17).",
+              "1) Is Jesus the promised Messiah and divine Son? 2) Is God a Trinity — one Being, three Persons? 3) How is sin atoned — through repentance, prayer and charity (with sacrificial worship, traditional Jews hope, to be restored), or the cross as the final sacrifice (Hebrews 10)? 4) What is the new covenant of Jeremiah 31? Christians answer: Jesus fulfils all four (Matt 5:17).",
             ),
             info(
               "How to speak — and how not to",
@@ -320,7 +320,7 @@ export const worldviewsCourse: SeedCourse = {
             ),
             info(
               "The Five Pillars",
-              "1) Shahada — confess 'there is no god but Allah, and Muhammad is his messenger.' 2) Salat — five daily prayers toward Mecca. 3) Zakat — almsgiving (~2.5%). 4) Sawm — fasting Ramadan's daylight hours. 5) Hajj — pilgrimage to Mecca once if able. A disciplined, communal, works-and-merit framework of devotion.",
+              "1) Shahada — confess 'there is no god but Allah, and Muhammad is his messenger.' 2) Salat — five daily prayers toward Mecca. 3) Zakat — almsgiving (~2.5%). 4) Sawm — fasting Ramadan's daylight hours. 5) Hajj — pilgrimage to Mecca once if able. A disciplined, communal framework of devotion, in which deeds are weighed and God's mercy is sought.",
             ),
             info(
               "Tawhid: the uncompromising oneness",
@@ -330,7 +330,7 @@ export const worldviewsCourse: SeedCourse = {
               "What does 'Islam' literally mean?",
               "Submission (to God)",
               ["Peace at any price", "The sword of God", "The final philosophy"],
-              "A Muslim is 'one who submits.' The name announces the framework: surrender, not trust-in-a-person.",
+              "A Muslim is 'one who submits.' The name announces the framework: surrender to God's revealed law — where Christianity emphasizes trust in God's incarnate Son (though Muslims too speak of tawakkul, trust in Allah).",
             ),
             match("Match each pillar to its practice", [
               ["Shahada", "Confession of faith"],
@@ -365,11 +365,11 @@ export const worldviewsCourse: SeedCourse = {
           challenges: [
             info(
               "The charge of tahrif ('corruption')",
-              "The Quran tells Muslims to trust the Torah and Gospel (Surah 5:46-47, 10:94), yet the New Testament we possess contradicts Islam on the cross and the Sonship of Jesus. The usual resolution: the earlier scriptures were corrupted (tahrif). Everything then turns on one testable question — WHEN? Corruption before Muhammad would be caught by manuscripts; corruption after is impossible, because we possess complete New Testaments from the 300s AD — centuries BEFORE Islam began.",
+              "The Quran tells Muslims to trust the Torah and Gospel (Surah 5:46-47, 10:94), yet the New Testament we possess contradicts Islam on the cross and the Sonship of Jesus. The usual resolution: the earlier scriptures were corrupted (tahrif). Everything then turns on one testable question — WHEN? Corruption before Muhammad would be caught by manuscripts; corruption after is impossible, because we possess complete or nearly complete New Testaments from the 300s AD — centuries BEFORE Islam began.",
             ),
             info(
               "What the manuscripts actually show",
-              "We hold ~5,800 Greek New Testament manuscripts, plus ~10,000 Latin and 9,000+ in other languages — including Codex Sinaiticus and Vaticanus (complete NTs, 4th century) and P52, a fragment of John from the early 100s AD. Quotations by early church writers alone could reconstruct nearly the whole NT. The textual variants scholars debate (like the longer ending of Mark) are flagged in the footnotes of every study Bible — nothing about the cross or the Sonship of Jesus hinges on them.",
+              "We hold ~5,800 Greek New Testament manuscripts, plus ~10,000 Latin and 9,000+ in other languages — including Codex Sinaiticus and Vaticanus (complete or nearly complete NTs, 4th century) and P52, a fragment of John from the early 100s AD. Quotations by early church writers alone could reconstruct nearly the whole NT. The textual variants scholars debate (like the longer ending of Mark) are flagged in the footnotes of every study Bible — nothing about the cross or the Sonship of Jesus hinges on them.",
             ),
             sel(
               "Why does a 4th-century complete New Testament matter for this debate?",
@@ -419,7 +419,7 @@ export const worldviewsCourse: SeedCourse = {
             ),
             info(
               "The historical case for the crucifixion",
-              "The crucifixion of Jesus under Pontius Pilate is one of the most secure facts of ancient history: all four Gospels (within living memory), the Roman historian Tacitus (Annals 15.44: 'Christus… suffered the extreme penalty during the reign of Tiberius at the hands of Pontius Pilatus'), the Jewish historian Josephus (Antiquities 18), and unanimous early Christian and even anti-Christian tradition. Bart Ehrman — an agnostic skeptic — calls denying the crucifixion 'ahistorical.'",
+              "The crucifixion of Jesus under Pontius Pilate is one of the most secure facts of ancient history: all four Gospels (within living memory), the Roman historian Tacitus (Annals 15.44: 'Christus… suffered the extreme penalty during the reign of Tiberius at the hands of Pontius Pilatus'), the Jewish historian Josephus (Antiquities 18), and unanimous early Christian and even anti-Christian tradition. Bart Ehrman — an agnostic skeptic — writes that Jesus' death by crucifixion under Pontius Pilate is 'as sure as anything historical can ever be.'",
             ),
             info(
               "Resurrection: the Christian's positive case",
@@ -486,7 +486,7 @@ export const worldviewsCourse: SeedCourse = {
               "Deut 6:4 and James 2:19 — Christians confess exactly one God; the debate is about His inner life.",
             ),
             assist(
-              "Colossians 4:6: 'Let your speech be always gracious, seasoned with ___'",
+              "Colossians 4:6: 'Let your speech always be gracious, seasoned with ___'",
               "The manner of truth matters as much as the truth.",
               "salt",
               ["fire", "iron", "honey"],
@@ -523,7 +523,7 @@ export const worldviewsCourse: SeedCourse = {
             ),
             info(
               "Three pressure points",
-              "1) A universe from nothing, fine-tuned for life, bursting with information, is not obviously godless — it cries out for explanation. 2) Objective morality ('torturing children for fun is REALLY wrong') makes sense if a moral Lawgiver exists; without one, 'wrong' is just chemistry and preference. 3) Atheism's own story must answer the four questions too: from where? what's wrong? what's the fix? where heading? 'Heat death and no meaning' is honest — and hard to live.",
+              "1) A universe from nothing, fine-tuned for life, bursting with information, is not obviously godless — it cries out for explanation. 2) Objective morality ('torturing children for fun is REALLY wrong') makes sense if a moral Lawgiver exists; without one, the atheist must ground 'wrong' in preference, convention or biology — and non-theistic moral realists struggle to say how. 3) Atheism's own story must answer the four questions too: from where? what's wrong? what's the fix? where heading? 'Heat death and no meaning' is honest — and hard to live.",
             ),
             sel(
               "The moral argument presses the question…",
@@ -533,7 +533,7 @@ export const worldviewsCourse: SeedCourse = {
             ),
             assist(
               "Fine-tuning refers to the universe's physical constants being set within ___ ranges for life",
-              "Even Stephen Hawking conceded the universe 'appears remarkably fine-tuned.'",
+              "Even Stephen Hawking wrote that the universe's numbers 'seem to have been very finely adjusted to make possible the development of life.' (A Brief History of Time)",
               "narrow",
               ["random", "wide", "unknown"],
               "Gravity, the cosmological constant and dozens of others sit in razor-thin life-permitting ranges.",
@@ -551,9 +551,9 @@ export const worldviewsCourse: SeedCourse = {
               "Take the strong version seriously — then weigh the cross: God did not stand outside suffering but entered it.",
             ),
             typeAns(
-              "Which 20th-century atheist regimes does the 'religion causes wars' comparison usually meet? Name either leader (one word).",
+              "Which 20th-century state-atheist regimes does the 'religion causes wars' comparison usually meet? Name either leader (one word).",
               "stalin",
-              ["stalin", "mao", "pol pot", "stalin mao", "hitler"],
+              ["stalin", "mao", "pol pot", "stalin mao"],
               "Stalin, Mao and Pol Pot — state atheism with tens of millions dead. The argument cuts both ways.",
             ),
           ],
@@ -563,7 +563,7 @@ export const worldviewsCourse: SeedCourse = {
           challenges: [
             info(
               "A river, not a fountain",
-              "Hinduism is a family of traditions — Vedas and Upanishads, Brahman the ultimate reality, millions of devas (gods) as its faces, karma and reincarnation (samsara), and moksha (liberation) as the goal. Paths are many: devotion (bhakti), knowledge (jnana), works (karma), meditation (yoga).",
+              "Hinduism is a family of traditions — Vedas and Upanishads, Brahman the ultimate reality, myriad devas (deities) honored across its many traditions, karma and reincarnation (samsara), and moksha (liberation) as the goal. Paths are many: devotion (bhakti), knowledge (jnana), works (karma), meditation (yoga).",
             ),
             info(
               "Where the stories diverge",
@@ -579,8 +579,8 @@ export const worldviewsCourse: SeedCourse = {
               "The Hindu goal of liberation from the cycle of rebirth is ___",
               "Release from samsara into ultimate reality.",
               "moksha",
-              ["moksa", "nirvana", "atman", "moksha moksa"],
-              "Moksha — while Buddhism's parallel goal, nirvana, means 'blowing out' the self's craving.",
+              ["nirvana", "atman", "samsara", "dukkha"],
+              "Moksha — while Buddhism's parallel goal, nirvana, means 'blowing out' the fires of craving.",
             ),
             match("Match the term to its meaning", [
               ["Brahman", "Ultimate reality"],
@@ -611,7 +611,7 @@ export const worldviewsCourse: SeedCourse = {
             ),
             info(
               "Two stories, two diagnoses",
-              "Buddha: suffering comes from craving; cure by detachment until the self's fires go out (nirvana). Jesus: suffering comes from a broken world and broken hearts; cure by attachment to a Person — 'I am the resurrection and the life.' One seeks release from desire; the other redirects desire to its true Home. Buddhism is officially non-theistic; the Bible begins 'In the beginning, God.'",
+              "Buddha: suffering comes from craving; cure by detachment until the fires of greed, hatred and delusion are extinguished (nirvana). Jesus: suffering comes from a broken world and broken hearts; cure by attachment to a Person — 'I am the resurrection and the life.' One seeks release from desire; the other redirects desire to its true Home. Buddhism is officially non-theistic; the Bible begins 'In the beginning, God.'",
             ),
             sel(
               "Buddhism's diagnosis of suffering is…",
@@ -621,9 +621,9 @@ export const worldviewsCourse: SeedCourse = {
             ),
             assist(
               "The Buddhist state of release, literally 'blowing out' the fires of craving, is ___",
-              "The candle of the self is extinguished.",
+              "The fires of craving are extinguished.",
               "nirvana",
-              ["moksha", "koan", "satori", "nibbana"],
+              ["moksha", "koan", "satori", "dukkha"],
               "Nirvana (Pali: nibbana). Not a place — a release.",
             ),
             match("Match the framework", [
@@ -639,7 +639,7 @@ export const worldviewsCourse: SeedCourse = {
               "'Our hearts are restless till they rest in Thee' — Augustine answers Buddha with a Person.",
             ),
             typeAns(
-              "Which claim of Jesus directly answers death — Buddhism's ultimate problem? (hint: John 11:25, three words)",
+              "Which claim of Jesus directly answers death — Buddhism's ultimate problem? (hint: John 11:25 — start with 'I am…')",
               "i am the resurrection",
               ["i am the resurrection", "i am the resurrection and the life", "the resurrection"],
               "'I am the resurrection and the life' — not escape FROM the world, but the world made new.",
@@ -665,7 +665,7 @@ export const worldviewsCourse: SeedCourse = {
               "New Age thought typically holds that…",
               "The divine is a force within you, channelled by practice and intention",
               ["God is a Person who commands", "Truth is fixed and revealed", "Humans are sinners needing rescue"],
-              "'You are God' is the oldest promise in the book — Genesis 3:5.",
+              "'You will be like God' is the serpent's oldest lie — Genesis 3:5."
             ),
             assist(
               "Jesus claimed: 'I am the way, and the truth, and the ___'",
@@ -687,10 +687,10 @@ export const worldviewsCourse: SeedCourse = {
               "Respectful curiosity opens doors that contempt welds shut.",
             ),
             typeAns(
-              "Which commandment directly forbids harnessing spiritual powers for control? Give its number as a word.",
+              "Which commandment ultimately forbids harnessing spiritual powers for control? Give its number as a word.",
               "first",
               ["first", "one", "the first", "1st"],
-              "'You shall have no other gods before me' — Exodus 20:3.",
+              "'You shall have no other gods before me' — Exodus 20:3; the direct prohibitions of occult practice are Deut 18:9-14 and Lev 19:31.",
             ),
           ],
         },
@@ -756,7 +756,7 @@ export const worldviewsCourse: SeedCourse = {
             ),
             info(
               "'Science has replaced God' and 'all religions are the same'",
-              "Science asks HOW; it cannot answer WHY or WHO — method limits, not discoveries. Christians founded modern science on the conviction that a rational Lawgiver made a lawlike world (Kepler: 'thinking God's thoughts after Him'). And religions contradict each other on the four questions — agreeing only that questions exist. Same-mountain slogans flatten what each faith actually claims.",
+              "Science asks HOW; it cannot answer WHY or WHO — method limits, not discoveries. Christians founded modern science on the conviction that a rational Lawgiver made a lawlike world (a phrase long attributed to Kepler: 'thinking God's thoughts after Him'). And religions contradict each other on the four questions — agreeing only that questions exist. Same-mountain slogans flatten what each faith actually claims.",
             ),
             assist(
               "Revelation 21:4 promises God will wipe away every ___ from our eyes",
@@ -778,10 +778,10 @@ export const worldviewsCourse: SeedCourse = {
               ["'All religions are one'", "They contradict on the four questions"],
             ]),
             typeAns(
-              "Give Kepler's famous phrase for doing science: 'thinking God's ___ after Him' (one word)",
+              "Give the phrase long attributed to Kepler for doing science: 'thinking God's ___ after Him' (one word)",
               "thoughts",
               ["thoughts"],
-              "'Thinking God's thoughts after Him' — faith fuelled physics, not fought it.",
+              "'Thinking God's thoughts after Him' — a motto historians can't find in Kepler's own writings, but which captures the faith of early modern science: faith fuelled physics, not fought it.",
             ),
           ],
         },

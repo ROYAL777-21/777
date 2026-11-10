@@ -56,7 +56,7 @@ export const hebrewCourse: SeedCourse = {
               "ה",
               "He",
               ["Chet", "Vav", "Zayin"],
-              "ה (he) — says 'h'. It appears twice in the sacred name יהוה (YHWH) and ends both אֱלֹהִים (Elohim) and תּוֹרָה (torah)!"
+              "ה (he) — says 'h'. It appears twice in the sacred name יהוה (YHWH), ends תּוֹרָה (torah), and sits inside אֱלֹהִים (Elohim)!"
             ),
           ],
         },
@@ -96,7 +96,7 @@ export const hebrewCourse: SeedCourse = {
             ]),
             assist(
               "Complete the word 'house' — בַּיִת (b-a-yit)",
-              "בַּ ___ יִת",
+              "בַּי ___",
               ["ת"],
               ["ר", "שׁ", "ק"],
               "בַּיִת (bayit) — house. Torah scrolls say 'the house of YHWH' with this word!"
@@ -268,6 +268,7 @@ export const hebrewCourse: SeedCourse = {
               ["ך", "final kaf"],
               ["ם", "final mem"],
               ["ן", "final nun"],
+              ["ף", "final pe"],
               ["ץ", "final tsade"],
             ]),
             assist(
@@ -392,7 +393,7 @@ export const hebrewCourse: SeedCourse = {
               "מֶלֶךְ",
               "2 (me-lech)",
               ["1 (melech)", "3 (me-le-ch)", "4"],
-              "me-lech — two closed syllables, each with a segol 'e'."
+              "me-lech — one open syllable (me) and one closed syllable (lech), each with a segol 'e'."
             ),
             sel(
               "What does this word mean?",
@@ -419,7 +420,7 @@ export const hebrewCourse: SeedCourse = {
               "the king of peace",
               ["the", "king", "of", "peace"],
               ["sun"],
-              "מֶלֶךְ הַשָּׁלוֹם — the King of Peace. Some rabbis read this title into Melchizedek (Gen 14)!"
+              "מֶלֶךְ הַשָּׁלוֹם — the King of Peace. Hebrews 7:2 reads Melchizedek's Salem (Gen 14) as 'king of peace'!"
             ),
           ],
         },
@@ -448,7 +449,7 @@ export const hebrewCourse: SeedCourse = {
             ),
             info(
               "חֶסֶד — the impossible word",
-              "Translators fight over חֶסֶד (chesed): steadfast love? lovingkindness? covenant loyalty? It's the LOVE that KEEPS ITS PROMISES — the word Ruth uses for her loyalty and God uses for His. One translation had to invent a word: 'covenant love'!",
+              "Translators fight over חֶסֶד (chesed): steadfast love? lovingkindness? covenant loyalty? It's the LOVE that KEEPS ITS PROMISES — the word Ruth uses for her loyalty and God uses for His. One translation had to coin a whole word for it: 'lovingkindness' (Coverdale, 1535 — carried into the KJV)!",
               "chesed"
             ),
             sel(
@@ -456,7 +457,7 @@ export const hebrewCourse: SeedCourse = {
               "חֶסֶד",
               "Steadfast, covenant love",
               ["Holy fear", "Great wealth", "Long life"],
-              "Chesed — loyal, covenant love. 'His chesed endures forever' appears 41 times in Psalm 136 alone!"
+              "Chesed — loyal, covenant love. 'His chesed endures forever' closes every one of Psalm 136's 26 verses — 33 times across Psalms, 41 times across the whole OT!"
             ),
             match("Tap the pairs", [
               ["שָׁלוֹם", "peace / wholeness"],
@@ -512,7 +513,7 @@ export const hebrewCourse: SeedCourse = {
               "Let there be light",
               ["Let", "there", "be", "light"],
               ["life"],
-              "יְהִי אוֹר — four syllables in Hebrew, four words in English. And there was light!"
+              "יְהִי אוֹר — three syllables in Hebrew, four words in English. And there was light!"
             ),
           ],
         },
@@ -610,7 +611,7 @@ export const hebrewCourse: SeedCourse = {
           challenges: [
             info(
               "בָּרָא — God's signature verb",
-              "In the entire Hebrew Bible, the verb בָּרָא (bara, 'created') NEVER has a subject other than God. Humans 'make' (עשׂה), 'form' (יצר), and 'build' (בנה) — but bara is God's word alone. Creating from nothing is His signature act!",
+              "In its basic (Qal) stem, the verb בָּרָא (bara, 'created') NEVER has a subject other than God. Humans 'make' (עשׂה), 'form' (יצר), and 'build' (בנה) — but bara is God's word alone. Creating from nothing is His signature act!",
               "bara"
             ),
             sel(
@@ -618,10 +619,10 @@ export const hebrewCourse: SeedCourse = {
               "בָּרָא",
               "Created",
               ["Blessed", "Chose", "Spoke"],
-              "bara — created. And only God ever does it in Scripture!"
+              "bara — created. And in its Qal stem, only God is ever the subject in Scripture!"
             ),
             sel(
-              "Who is the subject of בָּרָא in the Hebrew Bible?",
+              "Who is the subject of בָּרָא (Qal) in the Hebrew Bible?",
               "🤔 Grammar & theology",
               "God — always",
               ["Angels", "Humans", "Anyone"],
@@ -638,7 +639,7 @@ export const hebrewCourse: SeedCourse = {
               "Type the transliteration of אֱלֹהִים",
               "אֱלֹהִים",
               ["elohim", "elohiem", "eloheim"],
-              "Elohim — God, the Creator's covenant name in Genesis 1.",
+              "Elohim — God, the mighty Creator's name in Genesis 1 (the covenant name YHWH is revealed later, in Exodus 3).",
               "elohim"
             ),
             match("Tap the pairs", [

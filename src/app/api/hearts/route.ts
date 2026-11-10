@@ -8,7 +8,8 @@ export async function POST(req: Request) {
     const { hearts } = (await req.json()) as { hearts?: number }
     const user = await getOrCreateUser()
     const progress = await regenHearts(user.progress!)
-    const h = Math.max(0, Math.min(MAX_HEARTS, hearts ?? progress.hearts))
+    // Scroll Pro: hearts never deplete
+    const h = progress.plan !== "free" ? MAX_HEARTS : Math.max(0, Math.min(MAX_HEARTS, hearts ?? progress.hearts))
     const updated = await db.userProgress.update({
       where: { userId: "user_1" },
       data: { hearts: h, lastHeartAt: h < MAX_HEARTS ? new Date() : null },

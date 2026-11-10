@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { getOrCreateUser, ensureDailyQuests, dayKey } from "@/lib/gamification"
+import { TZ_OFFSET_MS } from "@/lib/time"
 import type { QuestsPayload } from "@/lib/types"
 
 export async function GET() {
@@ -23,7 +24,7 @@ export async function GET() {
 
     // refresh at local midnight
     const now = new Date()
-    const local = new Date(now.getTime() + 8 * 3600 * 1000)
+    const local = new Date(now.getTime() + TZ_OFFSET_MS)
     const msLeft =
       (24 - local.getUTCHours()) * 3600000 - (local.getUTCMinutes() * 60 + local.getUTCSeconds()) * 1000
 

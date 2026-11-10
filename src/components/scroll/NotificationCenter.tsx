@@ -1,5 +1,6 @@
 "use client"
 
+import { createPortal } from "react-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { motion, AnimatePresence } from "framer-motion"
 import { Send } from "lucide-react"
@@ -43,13 +44,18 @@ export function NotificationCenter({ open, onClose }: { open: boolean; onClose: 
     <AnimatePresence>
       {open && (
         <>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[45]"
-            onClick={onClose}
-          />
+          {/* backdrop portaled to body — the sticky header's backdrop-blur
+              makes position:fixed children relative to the header otherwise */}
+          {createPortal(
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[45]"
+              onClick={onClose}
+            />,
+            document.body,
+          )}
           <motion.div
             initial={{ opacity: 0, y: -8, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}

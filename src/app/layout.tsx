@@ -12,17 +12,33 @@ const nunito = Nunito({
 export const metadata: Metadata = {
   title: "Scroll Academy — Gamified Bible Study",
   description:
-    "Learn Biblical Greek, Hebrew, manuscripts & apologetics with Duolingo-style gamification: streaks, XP, hearts, leagues and quests.",
+    "Learn Biblical Greek, Hebrew, manuscripts, apologetics and the great denominations with Duolingo-style gamification: streaks, XP, hearts, leagues and quests.",
+  applicationName: "Scroll Academy",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Scroll Academy",
+  },
+  formatDetection: { telephone: false },
   icons: {
     icon: "/scroll-icon.svg",
+    apple: "/scroll-icon.svg",
   },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  themeColor: "#fff9ec",
+  maximumScale: 5,
+  // pinch-zoom stays available (WCAG 1.4.4); double-tap zoom on lesson
+  // buttons is already suppressed by `touch-action: manipulation` in CSS
+  userScalable: true,
+  viewportFit: "cover", // iPhone notch + home indicator support
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#fff9ec" },
+    { media: "(prefers-color-scheme: dark)", color: "#fff9ec" },
+  ],
 };
 
 export default function RootLayout({

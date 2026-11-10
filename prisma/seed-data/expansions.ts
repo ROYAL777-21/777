@@ -26,7 +26,7 @@ export const courseExpansions: Record<string, SeedUnit[]> = {
               "⚙️ Grammar check",
               "The verb ending already encodes person and number",
               ["Pronouns are forbidden in Greek", "Greek has no pronouns at all", "Subjects were considered rude"],
-              "λύεις means 'you loose' — the -εις IS the 'you.' When a pronoun DOES appear, it's emphatic: ΕΜPHASIS.",
+              "λύεις means 'you loose' — the -εις IS the 'you.' When a pronoun DOES appear, it's emphatic: EMPHASIS.",
             ),
             info(
               "Present: the ongoing view",
@@ -79,7 +79,7 @@ export const courseExpansions: Record<string, SeedUnit[]> = {
               ["Aspect", "camera angle on action"],
             ]),
             typeAns(
-              "Type the Greek imperfect meaning 'he was saying' (ἔλεγεν) — transliterate as 'elegen' or type Greek",
+              "Type the Greek imperfect meaning 'he was saying' — transliterate as 'elegen' or type Greek",
               "Transliteration drill",
               ["elegen", "ἔλεγεν"],
               "ἔλεγεν (elegen) — imperfect of λέγω: 'he kept saying / was saying.'",
@@ -109,7 +109,7 @@ export const courseExpansions: Record<string, SeedUnit[]> = {
               "Paul's gasp — 'may it never be!' — in Greek is μὴ ___",
               "The optative jewel",
               "genoito",
-              [" Kurie ", "panta", "lego"],
+              ["Kurie", "panta", "lego"],
               "μὴ γένοιτο — ten times in Romans alone. The apostle's 'heavens, no!'",
             ),
             match("Mood to stance", [
@@ -153,7 +153,7 @@ export const courseExpansions: Record<string, SeedUnit[]> = {
             ),
             info(
               "The sheva: the whisper",
-              "The silent sheva (ְ ) is the sound of a syllable-closing consonant with no vowel — or the briefest 'eh' when it opens a syllable (called vocal sheva). שְׁמַע = sh'-MA: the שׁ closes with a whisper, then stress lands. The sheva is why Biblical Hebrew sounds like waves — soft consonant-ushers between vowel-crests.",
+              "The silent sheva (ְ ) is the sound of a syllable-closing consonant with no vowel — or the briefest 'eh' when it opens a syllable (called vocal sheva). שְׁמַע = shə-MA: the שׁ opens with a whispered 'ə', then stress lands on MA. The sheva is why Biblical Hebrew sounds like waves — soft consonant-ushers between vowel-crests.",
             ),
             assist(
               "שְׁמַע (shema) is syllabified as…",
@@ -251,7 +251,7 @@ export const courseExpansions: Record<string, SeedUnit[]> = {
       description: "How Hebrew poems work — parallelism, psalm types, proverbs, and the wisdom of Job.",
       emoji: " ✒️".trim(),
       color: "#92400E",
-      difficulty: 2,
+      difficulty: 3,
       lessons: [
         {
           title: "How Hebrew Poems Rhyme",
@@ -279,7 +279,7 @@ export const courseExpansions: Record<string, SeedUnit[]> = {
               ["Ps 19:1", "synonymous pair"],
             ]),
             assist(
-              "In antithetic parallelism, the second line is joined by the Hebrew 'aval' or 'but' — the marker of ___.",
+              "In antithetic parallelism, the second line stands against the first — often marked by a contrastive 'but' (וְ/כִּי in Hebrew) — the marker of ___.",
               "Spotting the hinge",
               "contrast",
               ["synonym", "summary", "silence"],
@@ -376,14 +376,14 @@ export const courseExpansions: Record<string, SeedUnit[]> = {
           challenges: [
             info(
               "Lost in translation? No — found in idiom",
-              "Every language paints with local colors. Hebrew: 'hard of heart' = stubborn; 'cover his head' = mourn; 'lift the face' = show favor; 'their heart went out' = compassion (bowels of mercy in older English — the Hebrew seat of feeling!). Greek: 'bowels of mercies' (KJV of Col 3:12) = deep compassion. When a phrase feels odd, suspect an idiom before a doctrine.",
+              "Every language paints with local colors. Hebrew: 'hard of heart' = stubborn; 'cover his head' = mourn; 'lift the face' = show favor; 'their heart went out' = compassion — Genesis 43:30's inward-parts idiom ('his bowels yearned,' KJV — the Hebrew seat of feeling!). Greek: 'bowels of mercies' (KJV of Col 3:12) = deep compassion. When a phrase feels odd, suspect an idiom before a doctrine.",
             ),
             sel(
               "'Their heart went out to him' translates a Hebrew idiom where the SEAT of compassion is…",
               " 🫀".trim() + " Idiom check",
               "The inward parts (bowels/gut)",
               ["The knees", "The right hand", "The tongue"],
-              "Splagchnizomai — 'moved in one's guts' — is the NT's word for compassion. English says heart; Hebrew said gut. Same feeling, different anatomy of metaphor.",
+              "Gen 43:30 — 'his heart went out to his brother': the Hebrew idiom seats compassion in the inward parts. English says heart; Hebrew said gut. Same feeling, different anatomy of metaphor — and the NT's own word for compassion (splagchnizomai, 'moved in one's guts') keeps the picture.",
             ),
             info(
               "Eyes, hands, names",
@@ -402,7 +402,7 @@ export const courseExpansions: Record<string, SeedUnit[]> = {
           challenges: [
             info(
               "The Hebrew sandwich",
-              "A chiasm (from the Greek letter chi, X) arranges lines as A-B-B'-A' — ideas mirrored around a CENTER. Mark 2:27: 'The Sabbath was made for man (A), not man for the Sabbath (B — wait, reversed): the CENTER carries the point.' Finding the pivot is finding the author's finger pointing: 'THERE.' Hebrew authors thought in balanced, folded structures the way we think in bullet points.",
+              "A chiasm (from the Greek letter chi, X) arranges lines as A-B-B'-A' — ideas mirrored around a CENTER. Mark 2:27–28: 'The Sabbath was made for man (A), not man for the Sabbath (A′) — and the Son of Man is lord even of the Sabbath.' In longer chiasms (A-B-C-B'-A') the pivot (C) carries the point. Finding the pivot is finding the author's finger pointing: 'THERE.' Hebrew authors thought in balanced, folded structures the way we think in bullet points.",
             ),
             sel(
               "In a chiasm A-B-C-B'-A', the main point usually sits at…",
@@ -623,7 +623,7 @@ export const courseExpansions: Record<string, SeedUnit[]> = {
           challenges: [
             info(
               "From list to letter",
-              "The trail runs: (c. 140) Marcion's truncated canon (Luke + Paul, edited) — provoking the church to state what it read; (c. 180) the Muratorian Fragment lists the four Gospels, Acts, Paul's letters (with nuances), Revelation, and pauses over some; (c. 200) Origen distinguishes homologoumena (acknowledged) from antilegomena (disputed: Hebrews, James, 2 Peter, Jude, 2–3 John); (367) Athanasius' Easter letter lists EXACTLY our 27 NT books — the first surviving complete list; (393/397) councils at Hippo and Carthage confirm for the West. The church did not fabricate a canon; it surrendered to one.",
+              "The trail runs: (c. 140) Marcion's truncated canon (Luke + Paul, edited) — provoking the church to state what it read; (c. 180) the Muratorian Fragment lists the four Gospels, Acts, Paul's letters (with nuances), Revelation, and pauses over some; (c. 200) Origen already distinguishes acknowledged from disputed books — Hebrews, James, 2 Peter, Jude, 2–3 John — the Greek terms homologoumena/antilegomena later standardized by Eusebius; (367) Athanasius' Easter letter lists EXACTLY our 27 NT books — the first surviving complete list; (393/397) councils at Hippo and Carthage confirm for the West. The church did not fabricate a canon; it surrendered to one.",
             ),
             arrange(
               "Order the milestones",
@@ -634,7 +634,7 @@ export const courseExpansions: Record<string, SeedUnit[]> = {
             ),
             info(
               "What about the Old Testament?",
-              "The OT canon was fixed within Judaism — the Law, Prophets and Writings (Tanakh) complete by Jesus' day: 'the Law of Moses, the Prophets and the Psalms' (Lk 24:44) is Jesus' threefold name for it. The disputed 'apocrypha' (Tobit, Maccabees, etc.) were widely read and valued but placed by Jews (and most fathers) OUTSIDE scripture — 'books for instruction but not for doctrine.' Rome canonized them at Trent (1540s); the Reformers followed the Hebrew canon and the earliest Greek practice.",
+              "The OT canon was fixed within Judaism — the Law, Prophets and Writings (Tanakh) complete by Jesus' day: 'the Law of Moses, the Prophets and the Psalms' (Lk 24:44) is Jesus' threefold name for it. The disputed 'apocrypha' (Tobit, Maccabees, etc.) were widely read and valued but placed by Jews — and by the earliest surviving Christian lists (Origen, Athanasius, Jerome) — outside scripture: 'books for instruction but not for doctrine.' Rome defined them as canonical at Trent (1546); the Reformers followed the Hebrew canon, while Greek churches continued to read them in the Septuagint.",
             ),
             sel(
               "Jesus' phrase 'the Law of Moses, the Prophets and the Psalms' refers to…",
@@ -696,7 +696,7 @@ export const courseExpansions: Record<string, SeedUnit[]> = {
           challenges: [
             info(
               "Dusting off the cartoons",
-              "Forget horns, pitchforks and cartoon demons — the Bible's hell is more serious, not less. Jesus' dominant image: GEHENNA, the valley outside Jerusalem's walls (once a place of child-sacrifice, by his day the city's refuse-heap) — a metaphor of destruction and shame. Other images: outer DARKNESS, the SECOND DEATH, exclusion from the wedding FEAST. Notice: the images conflict if literalized (fire and darkness together?) — they are word-pictures pointing past themselves at a reality worse than all of them: the loss of God.",
+              "Forget horns, pitchforks and cartoon demons — the Bible's hell is more serious, not less. Jesus' dominant image: GEHENNA, the valley outside Jerusalem's walls (once a place of child-sacrifice (Jer 7:31), by his day a byword for judgment and shame — the later 'refuse-heap' detail comes from medieval tradition) — a metaphor of destruction and shame. Other images: outer DARKNESS, the SECOND DEATH, exclusion from the wedding FEAST. Notice: the images conflict if literalized (fire and darkness together?) — they are word-pictures pointing past themselves at a reality worse than all of them: the loss of God.",
             ),
             sel(
               "Jesus' most-used word for hell, Gehenna, was originally…",
@@ -707,13 +707,13 @@ export const courseExpansions: Record<string, SeedUnit[]> = {
             ),
             info(
               "The Bible's own grammar of judgment",
-              "Scripture holds three notes in tension: DESTRUCTION ('they will suffer the punishment of eternal destruction, away from the presence of the Lord' — 2 Th 1:9); EXCLUSION ('cast out into the outer darkness… I never knew you' — Mt 25:12,30); PUNISHMENT proportioned ('few blows' and 'many blows' — Lk 12:47–48). What all three agree on: hell is REAL, CHOSEN (the door is locked on the inside, as Lewis said), and TERRIBLE — and God takes no pleasure in it: 'As I live, declares the Lord GOD, I have no pleasure in the death of the wicked' (Ezek 33:11).",
+              "Scripture holds three notes in tension: DESTRUCTION ('they will suffer the punishment of eternal destruction, away from the presence of the Lord' — 2 Th 1:9); EXCLUSION ('cast out into the outer darkness… I do not know you' — Mt 25:30, with Mt 7:23's 'I never knew you'); PUNISHMENT proportioned ('few blows' and 'many blows' — Lk 12:47–48). What all three agree on: hell is REAL, CHOSEN (the door is locked on the inside, as Lewis said), and TERRIBLE — and God takes no pleasure in it: 'As I live, declares the Lord GOD, I have no pleasure in the death of the wicked' (Ezek 33:11).",
             ),
             sel(
               "2 Thessalonians 1:9 describes hell as…",
               "📖 Data check",
               "Eternal destruction AWAY FROM the presence of the Lord",
-              ["Endless torture by creatures", "A purifying fire for everyone", "A second chance campus"],
+              ["Endless torture by creatures", "A purifying fire for everyone", "A cycle of second chances"],
               "Destruction-and-absence — the note Paul sounds. Whatever else hell is, it is the Godless outcome of a Godless choice.",
             ),
             match("Image to emphasis", [
@@ -763,7 +763,7 @@ export const courseExpansions: Record<string, SeedUnit[]> = {
               "The inside-lock",
               "inside",
               ["outside", "ceiling", "future"],
-              "God does not lock people out who want in; the tragedy is souls who will not walk in — chosen Godlessness, ratified forever.",
+              "On Lewis's telling, God does not lock people out who want in — the tragedy is souls who will not walk out of their own Godlessness, chosen and ratified forever.",
             ),
             info(
               "Speaking of hell like Jesus",
@@ -774,7 +774,7 @@ export const courseExpansions: Record<string, SeedUnit[]> = {
               " ✝️".trim() + " Register check",
               "Urgent warning from a Savior — 'I came not to judge but to save'",
               ["Gleeful announcement of doom", "Silence on the topic", "A job he delegated to angels"],
-              "The one with most to say about hell is the one who died to empty it. Take his tone when you take his doctrine.",
+              "The one with most to say about hell is the one who died to rescue us from it. Take his tone when you take his doctrine.",
             ),
             match("Tap the pairs", [
               ["Hell's images", "word-pictures, not blueprints"],

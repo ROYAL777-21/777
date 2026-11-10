@@ -24,7 +24,7 @@ const COURSE_TIPS: Record<
     ],
     outsideApp: [
       "Write the letters or words from this unit by hand three times each — handwriting builds recognition far faster than typing.",
-      "Open John 1 or Psalm 23 in an interlinear Bible (scripture4all.org or Blue Letter Bible) and hunt for words you already know.",
+      "Open John 1 (or Psalm 23 in the Greek LXX, where it's numbered Psalm 22) in an interlinear Bible (scripture4all.org or Blue Letter Bible) and hunt for words you already know.",
       "Listen to the Greek Audio Bible on Bible.is or Faith Comes By Hearing while commuting — even passive listening tunes your ear.",
       "Label items around your home with sticky notes using Greek words you've learned — vocabulary lives in places, not lists.",
     ],

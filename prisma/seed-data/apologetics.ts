@@ -180,11 +180,11 @@ export const apologeticsCourse: SeedCourse = {
               "P52 (~AD 125–175) brings John within living memory of the writing. No other ancient work comes close!"
             ),
             sel(
-              "Which Gospel fragment is the earliest known manuscript of ANY New Testament book?",
+              "Which Gospel fragment is the oldest widely accepted manuscript of ANY New Testament book?",
               "🧾 Papyrus check",
               "P52 — a fragment of John 18",
               ["A complete Mark", "A page of Luke", "A scroll of Matthew"],
-              "P52, the Rylands fragment — found in Egypt, proving John circulated early and far!"
+              "P52, the Rylands fragment — found in Egypt, proving John circulated early and far! (A proposed earlier Mark fragment, P137, remains debated.)"
             ),
             typeAns(
               "Which ancient poem is the runner-up to the NT in manuscript copies?",
@@ -439,7 +439,7 @@ export const apologeticsCourse: SeedCourse = {
             ),
             match("Tap the pairs", [
               ["Gary Habermas", "minimal facts scholar"],
-              ["Crucifixion", "accepted by all"],
+              ["Crucifixion", "accepted by virtually all"],
               ["Empty tomb", "accepted by ~75%"],
               ["James & Paul", "skeptics who converted"],
             ]),
@@ -458,7 +458,7 @@ export const apologeticsCourse: SeedCourse = {
               "Paul arrested Christians — then claimed the risen Christ appeared to HIM, and spent his life planting churches, ending in martyrdom!"
             ),
             typeAns(
-              "Which creed (1 Corinthians 15) lists resurrection appearances — within a few years of the event?",
+              "Which early creed, quoted in Paul's first letter to the Corinthians, lists resurrection appearances within a few years of the event?",
               "The early creed",
               ["1 corinthians 15", "1 cor 15", "corinthians 15", "1 corinthians"],
               "1 Corinthians 15:3–7 — a creed Paul 'received,' dated by scholars to within a few years of the crucifixion. Too early for legend!",
@@ -503,9 +503,9 @@ export const apologeticsCourse: SeedCourse = {
             sel(
               "What happened to most of the apostles for their testimony?",
               "🔥 Cost check",
-              "They suffered and died for claiming they saw the risen Christ",
+              "They faced suffering and death rather than recant (tradition records most were martyred)",
               ["They retired wealthy", "They recanted quietly", "They became politicians"],
-              "Tradition and history record their martyrdoms. People may die for what they BELIEVE true — no one dies for what they KNOW is false."
+              "James was killed by the sword (Acts 12:2); tradition and early history record martyrdoms for most of the rest. People may die for what they BELIEVE true — no one dies for what they KNOW is false."
             ),
           ],
         },
@@ -540,8 +540,8 @@ export const apologeticsCourse: SeedCourse = {
               "Complete 2 Corinthians 5:17: 'If anyone is in Christ, he is a new ___'",
               "2 Corinthians 5:17",
               ["creation"],
-              ["creature", "citizen", "chance"],
-              "'…he is a new CREATION. The old has passed away; behold, the new has come!'"
+              ["citizen", "counsel", "chance"],
+              "'…he is a new CREATION' (the KJV says 'new creature' — same Greek word, ktisis). The old has passed away; behold, the new has come!"
             ),
             info(
               "✝️ Unit complete!",
@@ -616,7 +616,7 @@ export const apologeticsCourse: SeedCourse = {
               "💥 Origin check",
               "Georges Lemaître — a Catholic priest and physicist",
               ["Richard Dawkins", "Isaac Newton", "Carl Sagan"],
-              "Fr. Georges Lemaître, 1927 — the 'primeval atom.' A priest gave science its beginning!"
+              "Fr. Georges Lemaître — his 1927 paper anticipated the expanding universe, and in 1931 he proposed the 'primeval atom.' A priest gave science its beginning!"
             ),
             sel(
               "Which monk founded the science of genetics?",
@@ -639,7 +639,7 @@ export const apologeticsCourse: SeedCourse = {
               "Doing science as if nature is regular is methodology. Claiming nature is all that exists is a philosophy — smuggled in without proof!"
             ),
             typeAns(
-              "Which word means 'the study of the laws of nature' — coined by believer Roger Bacon's tradition: modern ___",
+              "What word for the systematic study of nature grew up in Christian Europe on the conviction that a rational God made a lawlike world?",
               "The enterprise",
               ["science", "science!"],
               "Science — born in Christian Europe from the belief that a rational God made a rational, law-governed universe.",

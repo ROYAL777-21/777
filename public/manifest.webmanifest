@@ -1,0 +1,51 @@
+{
+  "name": "Scroll Academy — Gamified Bible Study",
+  "short_name": "Scroll",
+  "description": "Learn the Bible in its own languages — Greek, Hebrew, manuscripts, apologetics and the great denominations — with streaks, hearts and leagues.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fff9ec",
+  "theme_color": "#58cc02",
+  "categories": ["education", "books"],
+  "icons": [
+    {
+      "src": "/scroll-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/scroll-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Ask Papy",
+      "short_name": "Ask Papy",
+      "description": "Talk to your study companion",
+      "url": "/?assistant=1"
+    },
+    {
+      "name": "Streak flame",
+      "short_name": "Streak",
+      "description": "Is your streak alive today?",
+      "url": "/widget/streak"
+    },
+    {
+      "name": "Verse of the day",
+      "short_name": "Verse",
+      "description": "Today's KJV verse",
+      "url": "/widget/verse"
+    },
+    {
+      "name": "Daily goal",
+      "short_name": "Goal",
+      "description": "Your XP ring for today",
+      "url": "/widget/xp"
+    }
+  ]
+}

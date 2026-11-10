@@ -1,5 +1,6 @@
 import { db } from "@/lib/db"
-import { USER_ID, levelInfo } from "@/lib/gamification"
+import { USER_ID, levelInfo, dayKey, mannaStateOf } from "@/lib/gamification"
+import { mannaVerseOfTheDay } from "@/lib/scripture"
 import type { BootstrapCourse, BootstrapUnit, BootstrapUser, CourseSummary } from "@/lib/types"
 import type { UserProgress } from "@prisma/client"
 
@@ -92,8 +93,9 @@ export function userToDTO(
     streak: progress.streak,
     streakFreezes: progress.streakFreezes,
     doubleXpUntil: progress.doubleXpUntil?.toISOString() ?? null,
-    dailyXp: progress.dailyXpDay === new Date().toISOString().slice(0, 10) ? progress.dailyXp : 0,
-    dailyXpGoal: 50,
+    // local day key (was UTC — the streak day-boundary is the user's wall clock)
+    dailyXp: progress.dailyXpDay === dayKey() ? progress.dailyXp : 0,
+    dailyXpGoal: progress.dailyGoal ?? 50,
     leagueOrder: progress.leagueOrder ?? 0,
     soundOn: progress.soundOn,
     hapticsOn: progress.hapticsOn,
@@ -103,5 +105,11 @@ export function userToDTO(
     levelIntoXp: lv.intoLevel,
     levelSpanXp: lv.levelSpan,
     xpForNext: lv.xpForNext,
+    plan: progress.plan as BootstrapUser["plan"],
+    isPro: progress.plan !== "free",
+    onTrial: progress.plan === "pro" && !!progress.trialEndsAt && progress.trialEndsAt > new Date(),
+    trialEndsAt: progress.trialEndsAt?.toISOString() ?? null,
+    lastActiveDay: progress.lastActiveDay ?? null,
+    manna: { ...mannaStateOf(progress), verse: mannaVerseOfTheDay() },
   }
 }

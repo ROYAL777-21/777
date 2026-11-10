@@ -11,7 +11,7 @@ export const metaphysicsCourse: SeedCourse = {
     "Being, change, causality, essence, universals, time, and freedom — the concepts theology thinks with when it thinks hardest. The most nuanced course in the academy: proceed slowly, reread, and let the concepts settle.",
   emoji: "🌀",
   color: "#475569",
-  order: 10,
+  order: 11,
   units: [
     {
       title: "First Philosophy",
@@ -103,7 +103,7 @@ export const metaphysicsCourse: SeedCourse = {
           challenges: [
             info(
               "The scorched ground of the 20th century",
-              "Logical positivists tried to abolish metaphysics: only science speaks meaningfully; 'God exists' is neither true nor false but NONSENSE. The abolition collapsed on its own terms — 'only verifiable statements are meaningful' is itself unverifiable (as Hume's guillotine learned from Kant's own critique). Metaphysics survived every attempt to kill it because questions about being, causation and persons never stop pressing. Today's philosophy of religion is metaphysics' phoenix.",
+              "Logical positivists tried to abolish metaphysics: only science speaks meaningfully; 'God exists' is neither true nor false but NONSENSE. The abolition collapsed on its own terms — 'only verifiable statements are meaningful' is itself unverifiable: the principle fails its own test. Metaphysics survived every attempt to kill it because questions about being, causation and persons never stop pressing. Today's philosophy of religion is metaphysics' phoenix.",
             ),
             sel(
               "Why did logical positivism self-destruct?",
@@ -429,7 +429,7 @@ export const metaphysicsCourse: SeedCourse = {
             ),
             info(
               "Three ways through",
-              "AQUINAS and classical theists: abstract objects exist as divine IDEAS — God's own intellect is the home of eternal truths (Augustine's rationes aeternae). Numbers and propositions are real, necessary, eternal — because they are THOUGHTS of the necessary, eternal Thinker. THEISTIC ACTUALISM: abstracta are not independently real — truth is grounded in God's nature. PLATONISM: they exist on their own — God coexists with a necessary realm He didn't think up (many judge this incoherent for classical theism).",
+              "AQUINAS and classical theists: abstract objects exist as divine IDEAS — God's own intellect is the home of eternal truths (Augustine's rationes aeternae). Numbers and propositions are real, necessary, eternal — because they are THOUGHTS of the necessary, eternal Thinker. THEISTIC ACTIVISM: abstracta are not independently real — they are created by, or grounded in, God's nature. PLATONISM: they exist on their own — God coexists with a necessary realm He didn't think up (many judge this incoherent for classical theism). Plantinga's 'theistic Platonism' instead lets abstracta exist uncreated, unthought — a middle path between the two.",
             ),
             sel(
               "Augustine's answer to eternal truths locates them…",
@@ -455,7 +455,7 @@ export const metaphysicsCourse: SeedCourse = {
           challenges: [
             info(
               "What are YOU?",
-              "The metaphysics of the person: SUBSTANCE DUALISM (you are a soul immaterially related to a body — Plato, Descartes), PHYSICALISM (you are your body/brain; mind IS brain activity), THOMISTIC HIC MORPHISM (you are one substance OF body-and-soul — the soul is the FORM of the body, not a ghost in a machine). Each answers differently: what survives death? What is a person? When does life begin? Could a copy of your brain be you?",
+              "The metaphysics of the person: SUBSTANCE DUALISM (you are a soul immaterially related to a body — Plato, Descartes), PHYSICALISM (you are your body/brain; mind IS brain activity), THOMISTIC HYLORMORPHISM (you are one substance OF body-and-soul — the soul is the FORM of the body, not a ghost in a machine). Each answers differently: what survives death? What is a person? When does life begin? Could a copy of your brain be you?",
             ),
             sel(
               "Thomistic hylomorphism says the soul is…",
@@ -578,7 +578,7 @@ export const metaphysicsCourse: SeedCourse = {
             ),
             info(
               "Sovereignty and freedom",
-              "How do God's sovereignty and human freedom coexist? The tradition's aids: (1) CONCURSUS — God works IN and THROUGH creaturely causes without violating them (like an author writing characters who act from their own motives); (2) PROVIDENCE over open possibilities — if the future is genuinely open (A-theory), God's sovereignty is dynamic, not merely pre-programmed; (3) THEODICY — the free-will defense against the problem of evil presupposes significant libertarian freedom: love that cannot be refused is not love. Genesis 50 holds both without flinching: 'You meant evil against me… God meant it for good.'",
+              "How do God's sovereignty and human freedom coexist? The tradition's aids: (1) CONCURSUS — God works IN and THROUGH creaturely causes without violating them (like an author writing characters who act from their own motives); (2) CLASSICAL PROVIDENCE — Augustine, Boethius and Aquinas hold that God timelessly foreknows the settled future without coercing it; (a modern minority proposal, open theism, instead pictures the future as partly open — but even an A-theory of time does not require that openness, so treat it as a debate, not the tradition); (3) THEODICY — the free-will defense against the problem of evil presupposes significant libertarian freedom: love that cannot be refused is not love. Genesis 50 holds both without flinching: 'You meant evil against me… God meant it for good.'",
             ),
             sel(
               "'Concursus' refers to…",

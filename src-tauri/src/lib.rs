@@ -19,9 +19,13 @@ use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 use std::time::{Duration, Instant};
 
-use tauri::{Manager, RunEvent};
+use serde as _; // re-exported through ledger; keep serde in scope for the derive macros
+use tauri::{Manager, RunEvent, WebviewUrl, WebviewWindowBuilder};
 use tauri_plugin_shell::process::CommandChild;
 use tauri_plugin_shell::ShellExt;
+
+pub mod ledger;
+pub mod telemetry;
 
 const SERVER_PORT: u16 = 3313;
 const SERVER_START_TIMEOUT_SECS: u64 = 90;
@@ -31,11 +35,94 @@ fn greet(name: &str) -> String {
     format!("Shalom, {}! Your scroll awaits.", name)
 }
 
+/// Native Scribe's-Ledger scoring — parity with the server engine.
+/// The webview calls this for instant offline scores.
+#[tauri::command]
+fn ledger_score(input: ledger::LedgerInput) -> ledger::LedgerScores {
+    ledger::score(&input)
+}
+
+/// Native XP math — mirrors the server's `awardActivityXp` rules.
+#[tauri::command]
+fn lesson_xp(
+    difficulty: u32,
+    first_time: bool,
+    perfect: bool,
+    combo: u32,
+    pro_weekend: bool,
+) -> ledger::XpBreakdown {
+    ledger::lesson_xp(difficulty, first_time, perfect, combo, pro_weekend)
+}
+
+// ── v11: telemetry schema parity ──────────────────────────────────
+// The webview compares this against GET /api/engine/schema so a stale
+// shell can never silently drift from the server's contract.
+#[tauri::command]
+fn schema_fingerprint() -> u32 {
+    telemetry::fingerprint()
+}
+
+// ── v11: the desktop companion widget window (laptops) ────────────
+// A small frameless always-on-top window over /widget/board. Created
+// on demand from the app (Profile → Scroll on your home screen → Show
+// desktop companion). No extra plugins — core window APIs only.
+
+#[tauri::command]
+fn toggle_widget(app: tauri::AppHandle, show: bool) -> Result<bool, String> {
+    if let Some(win) = app.get_webview_window("widget") {
+        if show {
+            let _ = win.show();
+            let _ = win.set_focus();
+            return Ok(true);
+        }
+        let _ = win.hide();
+        return Ok(false);
+    }
+    if !show {
+        return Ok(false);
+    }
+
+    // resolve the app origin from the main window (works in dev AND
+    // in the packaged sidecar build)
+    let origin = app
+        .get_webview_window("main")
+        .and_then(|m| m.url().ok())
+        .map(|u| u.origin().ascii_serialization())
+        .unwrap_or_else(|| format!("http://127.0.0.1:{SERVER_PORT}"));
+    let url: tauri::Url = format!("{origin}/widget/board?chrome=desktop")
+        .parse()
+        .map_err(|e| format!("invalid widget url: {e}"))?;
+
+    WebviewWindowBuilder::new(&app, "widget", WebviewUrl::External(url))
+        .title("Scroll Academy")
+        .inner_size(420.0, 560.0)
+        .min_inner_size(300.0, 380.0)
+        .decorations(false)
+        .always_on_top(true)
+        .skip_taskbar(true)
+        .resizable(true)
+        .build()
+        .map_err(|e| format!("widget window failed: {e}"))?;
+    Ok(true)
+}
+
+/// From the companion window: bring the main app window forward.
+#[tauri::command]
+fn open_main(app: tauri::AppHandle) -> Result<(), String> {
+    if let Some(win) = app.get_webview_window("main") {
+        let _ = win.show();
+        let _ = win.set_focus();
+    }
+    Ok(())
+}
+
 fn wait_for_server(timeout_secs: u64) -> bool {
     let deadline = Instant::now() + Duration::from_secs(timeout_secs);
     while Instant::now() < deadline {
         if TcpStream::connect_timeout(
-            &format!("127.0.0.1:{SERVER_PORT}").parse().expect("valid addr"),
+            &format!("127.0.0.1:{SERVER_PORT}")
+                .parse()
+                .expect("valid addr"),
             Duration::from_millis(400),
         )
         .is_ok()
@@ -70,7 +157,14 @@ pub fn run() {
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_shell::init())
         .manage(Mutex::new(None::<CommandChild>))
-        .invoke_handler(tauri::generate_handler![greet])
+        .invoke_handler(tauri::generate_handler![
+            greet,
+            ledger_score,
+            lesson_xp,
+            schema_fingerprint,
+            toggle_widget,
+            open_main
+        ])
         .build(tauri::generate_context!())
         .expect("error while running Scroll Academy")
         .run(|app, event| {

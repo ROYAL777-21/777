@@ -10,7 +10,7 @@ export const ethicsCourse: SeedCourse = {
     "Meta-ethics, the great rival frameworks, divine command and natural law, and the art of becoming a person of virtue. Learn to think clearly about right and wrong — and to live it.",
   emoji: "⚖️",
   color: "#4D7C0F",
-  order: 9,
+  order: 10,
   units: [
     {
       title: "The Moral Landscape",
@@ -74,7 +74,7 @@ export const ethicsCourse: SeedCourse = {
             ),
             info(
               "The relativist's trapdoor",
-              "If morality is relative to culture, then (a) reformers are always wrong — abolitionists 'sinned' against their culture's slavery; (b) 'culture' is fuzzy (which one? your city? your street? your gang?); (c) the claim 'morality is relative' claims to be true FOR EVERYONE — an objective claim sawing off its own branch. Paul Copan calls relativism the view that trips over its own feet. Most people abandon it the moment they are genuinely wronged: 'that was UNFAIR' — not 'that was unfair-for-me.'",
+              "If morality is relative to culture, then (a) reformers are always wrong — abolitionists 'sinned' against their culture's slavery; (b) 'culture' is fuzzy (which one? your city? your street? your gang?); (c) the claim 'morality is relative' claims to be true FOR EVERYONE — an objective claim sawing off its own branch. Relativism trips over its own feet — the trapdoor Paul Copan spends a whole book on (True for You, Not for Me). Most people abandon it the moment they are genuinely wronged: 'that was UNFAIR' — not 'that was unfair-for-me.'",
             ),
             sel(
               "Why does cultural relativism condemn the reformers?",
@@ -294,10 +294,10 @@ export const ethicsCourse: SeedCourse = {
               "The story ends with provision, not slaughter — and with a foreshadowing of the Lamb God Himself will provide.",
             ),
             typeAns(
-              "Type the Greek word for 'nature' used in the phrase 'God's ___ is the good' (also the source of 'essential')",
+              "God's ___ is the good — type the term for what a thing IS (English: 'essence'; Greek: 'ousia')",
               "Vocabulary",
               ["essence", "ousia"],
-              "Essence (ousia) — what a thing IS. God's essence includes goodness; commands flow from it like light from flame.",
+              "Essence (Greek ousia) — what a thing IS. God's essence includes goodness; commands flow from it like light from flame. (The Greek word for 'nature' in the sense of innate disposition is physis — ousia is the being-essence.)",
             ),
           ],
         },
@@ -379,7 +379,7 @@ export const ethicsCourse: SeedCourse = {
           challenges: [
             info(
               "Habits make the human",
-              "Aristotle: 'We are what we repeatedly do.' Aquinas: virtue is a habitus — a stable disposition. Scripture agrees with startling energy: 'train yourself for godliness' (1 Tim 4:7); 'discipline… yields the peaceful fruit of righteousness' (Heb 12:11). The spiritual disciplines (prayer, Scripture, fasting, fellowship, service) are virtue's gymnasium. Nobody drifts into Christlikeness; grace works through means, and the means are practices.",
+              "Will Durant, summing up Aristotle: 'We are what we repeatedly do. Excellence, then, is not an act, but a habit.' Aquinas: virtue is a habitus — a stable disposition. Scripture agrees with startling energy: 'train yourself for godliness' (1 Tim 4:7); 'discipline… yields the peaceful fruit of righteousness' (Heb 12:11). The spiritual disciplines (prayer, Scripture, fasting, fellowship, service) are virtue's gymnasium. Nobody drifts into Christlikeness; grace works through means, and the means are practices.",
             ),
             sel(
               "Virtue, on the classical view, is best described as…",
@@ -423,7 +423,7 @@ export const ethicsCourse: SeedCourse = {
             ),
             info(
               "Justice for the vulnerable",
-              "Biblical ethics has a stress-test: 'Religion that is pure and undefiled before God is this: to visit orphans and widows in their affliction' (Jas 1:27). The prophets thunder not about ritual precision but about the poor, the foreigner, the laborer's wage. Any 'ethics' that leaves the vulnerable untouched is pharisaism in academic dress. Generosity is not charity-as-spare-change but covenant love with its wallet open.",
+              "Biblical ethics has a stress-test: 'Religion that is pure and undefiled before God the Father is this: to visit orphans and widows in their affliction' (Jas 1:27). The prophets thunder not about ritual precision but about the poor, the foreigner, the laborer's wage. Any 'ethics' that leaves the vulnerable untouched is pharisaism in academic dress. Generosity is not charity-as-spare-change but covenant love with its wallet open.",
             ),
             sel(
               "The prophets' recurring moral indictment targeted…",

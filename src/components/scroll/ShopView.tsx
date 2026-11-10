@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { motion } from "framer-motion"
-import { Gem, Zap, Check } from "lucide-react"
+import { Gem, Zap, Check, Crown } from "lucide-react"
 import { useAppStore } from "@/lib/client/store"
 import { sfx } from "@/lib/client/sound"
 import { haptics } from "@/lib/client/haptics"
@@ -15,10 +15,13 @@ export function ShopView() {
   const qc = useQueryClient()
   const refreshApp = useRefreshApp()
   const pushToast = useAppStore((s) => s.pushToast)
+  const openPaywall = useAppStore((s) => s.openPaywall)
   const [busy, setBusy] = useState<string | null>(null)
   const [err, setErr] = useState<string | null>(null)
 
   const { data, isLoading } = useQuery<ShopPayload>({ queryKey: ["shop"] })
+  const { data: boot } = useQuery<{ user: { isPro: boolean } }>({ queryKey: ["bootstrap"] })
+  const isPro = boot?.user.isPro ?? false
 
   const buy = useMutation({
     mutationFn: async (slug: string) => {
@@ -62,6 +65,32 @@ export function ShopView() {
           <span className="tabular-nums">{data?.gems ?? "…"}</span>
         </div>
       </div>
+
+      {/* Scroll Pro — the whole store in one tap (Hormozi: bundle > à la carte) */}
+      {!isPro && (
+        <motion.button
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={() => {
+            sfx.tap()
+            haptics.tap()
+            openPaywall("shop")
+          }}
+          className="mb-4 w-full text-left bg-gradient-to-br from-[#FFC800] to-[#FFB800] rounded-3xl border-2 border-[#d9a400] shadow-[0_5px_0_#d9a400] p-5 flex items-center gap-4"
+        >
+          <span className="w-14 h-14 rounded-2xl bg-white/40 grid place-items-center shrink-0">
+            <Crown className="w-8 h-8 text-[#5c4500]" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block font-black text-lg text-[#3d2f00]">One quiet price for everything</span>
+            <span className="block text-sm font-bold text-[#5c4500] leading-snug">
+              Unlimited hearts, 2× XP weekends, Streak Repair ×2/mo, all 18 courses — $39.99 a year, 7-day free trial.
+            </span>
+          </span>
+          <span className="shrink-0 bg-[#5c4500] text-duo-gold font-black text-sm rounded-xl px-3 py-2">Go Pro</span>
+        </motion.button>
+      )}
 
       {err && (
         <div className="bg-duo-red/10 border-2 border-duo-red/40 text-duo-red font-extrabold rounded-2xl p-3 mb-4 text-sm">

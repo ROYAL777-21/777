@@ -22,12 +22,13 @@ const CATEGORY_COLORS: Record<string, string> = {
   Prophecy: "#0891B2",
 }
 
-/** ms until the next quiz day boundary (UTC+8 like the server's dayKey) */
+/** ms until the next quiz day boundary (browser-local midnight — the server
+ *  runs on the same machine, so its dayKey flips at the same moment) */
 function msUntilNextQuiz(): number {
   const now = new Date()
-  const next = new Date(now.getTime() + 8 * 3600 * 1000)
-  next.setUTCHours(24, 0, 0, 0)
-  return next.getTime() - (now.getTime() + 8 * 3600 * 1000)
+  const next = new Date(now)
+  next.setHours(24, 0, 0, 0) // next local midnight
+  return next.getTime() - now.getTime()
 }
 
 function fmtCountdown(ms: number): string {

@@ -1,5 +1,6 @@
 import { db } from "@/lib/db"
 import type { UserProgress, AppNotification } from "@prisma/client"
+import { TZ_OFFSET_MS } from "@/lib/time"
 
 // ─────────────────────────────────────────────────────────────
 //  Constants
@@ -13,16 +14,22 @@ export const LEAGUE_SIZE = 15
 export const PROMOTION_SLOTS = 5
 export const DEMOTION_SLOTS = 5
 
-const TZ_OFFSET_MS = 8 * 60 * 60 * 1000 // user timezone: UTC+8 (Asia/Shanghai)
+// TZ_OFFSET_MS comes from @/lib/time — follows the machine's own clock
 
 // ─────────────────────────────────────────────────────────────
 //  Time helpers
 // ─────────────────────────────────────────────────────────────
 
-/** local (UTC+8) calendar day key, e.g. "2026-10-29" */
+/** local calendar day key, e.g. "2026-10-29" (machine clock — see @/lib/time) */
 export function dayKey(d: Date = new Date()): string {
   const local = new Date(d.getTime() + TZ_OFFSET_MS)
   return local.toISOString().slice(0, 10)
+}
+
+/** local month key, e.g. "2026-11" — used for monthly Pro grants */
+export function monthKey(d: Date = new Date()): string {
+  const local = new Date(d.getTime() + TZ_OFFSET_MS)
+  return local.toISOString().slice(0, 7)
 }
 
 export function daysBetween(aKey: string, bKey: string): number {
@@ -79,7 +86,7 @@ const WELCOME_NOTIFICATIONS: Omit<AppNotification, "id" | "userId" | "createdAt"
   {
     type: "welcome",
     title: "Welcome to Scroll Academy! 📜",
-    body: "Your word is a lamp to my feet and a light to my path. Start your first lesson to light your streak!",
+    body: "“Thy word is a lamp unto my feet, and a light unto my path” — Psalm 119:105 (KJV). Start your first lesson to light your streak!",
     icon: "🕯️",
   },
 ]
@@ -102,7 +109,29 @@ export async function getOrCreateUser() {
     await db.userProgress.create({ data: { userId: USER_ID } })
     user = await db.user.findUnique({ where: { id: USER_ID }, include: { progress: true } })
   }
+  // ── Scroll Pro entitlements (monthly Streak Repair top-up) ──
+  await applyProEntitlements(user!.progress!)
   return user!
+}
+
+/**
+ * Scroll Pro entitlements, applied lazily on every user fetch:
+ *  · Streak Repair ×2 every month — tops the equipped freezes back up to 2
+ *    (shop cap is 2; the grant is idempotent per local calendar month).
+ *  · 2× XP weekends are applied at lesson-completion time (see api/lessons).
+ */
+export async function applyProEntitlements(progress: UserProgress): Promise<UserProgress> {
+  if (progress.plan === "free") return progress
+  const mk = monthKey()
+  if (progress.lastProFreezeGrant === mk) return progress
+  const updated = await db.userProgress.update({
+    where: { userId: USER_ID },
+    data: {
+      streakFreezes: Math.max(progress.streakFreezes, 2),
+      lastProFreezeGrant: mk,
+    },
+  })
+  return updated
 }
 
 /** lazily regenerate hearts over time; returns refreshed progress */
@@ -149,19 +178,22 @@ function hashStr(s: string): number {
 export async function ensureDailyQuests(day: string) {
   const all = await db.quest.findMany({ orderBy: { slug: "asc" } })
   const seed = hashStr(USER_ID + day)
-  const pick = (n: number, offset: number) => all[(seed + offset) % all.length]
+  // pick = stable pseudo-random index into the slug-sorted quest list
+  const pick = (offset: number) => all[(seed + offset) % all.length]
   const chosen = new Set<string>()
   for (let i = 0; chosen.size < 3 && i < 20; i++) {
-    chosen.add(pick(0, i * 7 + 3).slug)
+    chosen.add(pick(i * 7 + 3).slug)
   }
   const quests = all.filter((q) => chosen.has(q.slug))
-  for (const q of quests) {
-    await db.userQuest.upsert({
-      where: { userId_questId_day: { userId: USER_ID, questId: q.id, day } },
-      update: {},
-      create: { userId: USER_ID, questId: q.id, day, progress: 0 },
-    })
-  }
+  await Promise.all(
+    quests.map((q) =>
+      db.userQuest.upsert({
+        where: { userId_questId_day: { userId: USER_ID, questId: q.id, day } },
+        update: {},
+        create: { userId: USER_ID, questId: q.id, day, progress: 0 },
+      })
+    )
+  )
   return db.userQuest.findMany({
     where: { userId: USER_ID, day },
     include: { quest: true },
@@ -185,47 +217,37 @@ export async function advanceQuests(day: string, delta: QuestDelta) {
   const uqs = await ensureDailyQuests(day)
   const completedNow: string[] = []
   let gemsAwarded = 0
+  const METRIC_GETTERS: Record<string, (uq: (typeof uqs)[number]) => number> = {
+    xp: () => delta.xp ?? 0,
+    lessons: () => delta.lessons ?? 0,
+    combo: (uq) => Math.max(0, (delta.combo ?? 0) - uq.progress),
+    perfect: () => delta.perfect ?? 0,
+    correct: () => delta.correct ?? 0,
+    chapters: () => delta.chapters ?? 0,
+    plan_days: () => delta.plan_days ?? 0,
+    daily_quiz: () => delta.daily_quiz ?? 0,
+  }
+  // resolve each quest's increment, then apply the updates in parallel
+  const updates: Promise<unknown>[] = []
+  const finished: { title: string; gems: number }[] = []
   for (const uq of uqs) {
     if (uq.completed) continue
-    const q = uq.quest
-    let add = 0
-    switch (q.metric) {
-      case "xp":
-        add = delta.xp ?? 0
-        break
-      case "lessons":
-        add = delta.lessons ?? 0
-        break
-      case "combo":
-        add = Math.max(0, (delta.combo ?? 0) - uq.progress)
-        break
-      case "perfect":
-        add = delta.perfect ?? 0
-        break
-      case "correct":
-        add = delta.correct ?? 0
-        break
-      case "chapters":
-        add = delta.chapters ?? 0
-        break
-      case "plan_days":
-        add = delta.plan_days ?? 0
-        break
-      case "daily_quiz":
-        add = delta.daily_quiz ?? 0
-        break
-    }
+    const add = METRIC_GETTERS[uq.quest.metric]?.(uq) ?? 0
     if (add <= 0) continue
     const progress = uq.progress + add
-    const completed = progress >= q.target
-    await db.userQuest.update({
-      where: { id: uq.id },
-      data: { progress: Math.min(progress, q.target), completed, claimed: completed },
-    })
-    if (completed) {
-      completedNow.push(q.title)
-      gemsAwarded += q.gemsReward
-    }
+    const completed = progress >= uq.quest.target
+    updates.push(
+      db.userQuest.update({
+        where: { id: uq.id },
+        data: { progress: Math.min(progress, uq.quest.target), completed, claimed: completed },
+      })
+    )
+    if (completed) finished.push({ title: uq.quest.title, gems: uq.quest.gemsReward })
+  }
+  await Promise.all(updates)
+  for (const f of finished) {
+    completedNow.push(f.title)
+    gemsAwarded += f.gems
   }
   return { completedNow, gemsAwarded }
 }
@@ -299,28 +321,27 @@ function iconEmoji(icon: string): string {
 }
 
 export async function notifyQuestsAndAchievements(questRes: { completedNow: string[] }, achRes: { unlocked: { title: string; tierName: string; gems: number; icon: string }[] }) {
+  // one createMany instead of a sequential insert per notification
+  const rows: { userId: string; type: string; title: string; body: string; icon: string }[] = []
   for (const q of questRes.completedNow) {
-    await db.appNotification.create({
-      data: {
-        userId: USER_ID,
-        type: "quest",
-        title: "Quest complete! 🎯",
-        body: `You finished the daily quest “${q}”. Gems have been added to your wallet!`,
-        icon: "🎯",
-      },
+    rows.push({
+      userId: USER_ID,
+      type: "quest",
+      title: "Quest complete! 🎯",
+      body: `You finished the daily quest “${q}”. Gems have been added to your wallet!`,
+      icon: "🎯",
     })
   }
   for (const a of achRes.unlocked) {
-    await db.appNotification.create({
-      data: {
-        userId: USER_ID,
-        type: "achievement",
-        title: `Achievement: ${a.title} ${iconEmoji(a.icon)}`,
-        body: `You reached “${a.tierName}” and earned ${a.gems} gems. Beautiful work!`,
-        icon: "🏅",
-      },
+    rows.push({
+      userId: USER_ID,
+      type: "achievement",
+      title: `Achievement: ${a.title} ${iconEmoji(a.icon)}`,
+      body: `You reached “${a.tierName}” and earned ${a.gems} gems. Beautiful work!`,
+      icon: "🏅",
     })
   }
+  if (rows.length > 0) await db.appNotification.createMany({ data: rows })
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -350,8 +371,11 @@ export async function awardActivityXp(
   const doubled = !!progress.doubleXpUntil && progress.doubleXpUntil > new Date()
   const xpEarned = Math.round(opts.xp * (doubled ? 2 : 1))
 
-  const streakRes = await updateStreak(progress)
-  const questRes = await advanceQuests(today, { xp: xpEarned, ...(opts.questDelta ?? {}) })
+  // streak + quests are independent of each other — advance them together
+  const [streakRes, questRes] = await Promise.all([
+    updateStreak(progress),
+    advanceQuests(today, { xp: xpEarned, ...(opts.questDelta ?? {}) }),
+  ])
 
   // league xp
   const leagueId = `league-${progress.leagueOrder ?? 0}`
@@ -412,7 +436,7 @@ export async function awardActivityXp(
     totalXp,
     gems: totalGems,
     dailyXp,
-    dailyXpGoal: DAILY_XP_GOAL,
+    dailyXpGoal: progress.dailyGoal ?? DAILY_XP_GOAL,
     questsCompleted: questRes.completedNow,
     achievementsUnlocked: achRes.unlocked,
   }
@@ -432,8 +456,14 @@ export async function checkAchievements(ctx: {
   courses: number
 }) {
   const defs = await db.achievement.findMany()
+  // ONE read for the user's current tiers (was a findUnique per achievement),
+  // then parallel upserts only for the definitions that actually advanced.
+  const mine = await db.userAchievement.findMany({ where: { userId: USER_ID }, select: { achievementId: true, tier: true } })
+  const myTier = new Map(mine.map((m) => [m.achievementId, m.tier]))
   const unlocked: { title: string; tierName: string; gems: number; icon: string }[] = []
   let gems = 0
+  const gemScale = [10, 25, 50, 100, 250]
+  const upserts: Promise<unknown>[] = []
   for (const def of defs) {
     const tiers: number[] = JSON.parse(def.tiers)
     const tierNames: string[] = JSON.parse(def.tierNames)
@@ -441,21 +471,19 @@ export async function checkAchievements(ctx: {
     let newTier = 0
     for (let i = 0; i < tiers.length; i++) if (value >= tiers[i]) newTier = i + 1
     if (newTier === 0) continue
-    const existing = await db.userAchievement.findUnique({
-      where: { userId_achievementId: { userId: USER_ID, achievementId: def.id } },
-    })
-    if (existing && existing.tier >= newTier) continue
-    // gem rewards: define per-tier using a simple scale
-    const gemScale = [10, 25, 50, 100, 250]
+    if ((myTier.get(def.id) ?? 0) >= newTier) continue
     const gemReward = gemScale[Math.min(newTier - 1, gemScale.length - 1)]
-    await db.userAchievement.upsert({
-      where: { userId_achievementId: { userId: USER_ID, achievementId: def.id } },
-      update: { tier: newTier, unlockedAt: new Date() },
-      create: { userId: USER_ID, achievementId: def.id, tier: newTier, unlockedAt: new Date() },
-    })
+    upserts.push(
+      db.userAchievement.upsert({
+        where: { userId_achievementId: { userId: USER_ID, achievementId: def.id } },
+        update: { tier: newTier, unlockedAt: new Date() },
+        create: { userId: USER_ID, achievementId: def.id, tier: newTier, unlockedAt: new Date() },
+      })
+    )
     unlocked.push({ title: def.title, tierName: tierNames[newTier - 1], gems: gemReward, icon: def.icon })
     gems += gemReward
   }
+  await Promise.all(upserts)
   return { unlocked, gems }
 }
 
@@ -528,29 +556,31 @@ export async function ensureLeagueState(progress: UserProgress) {
   })
   if (bots < LEAGUE_SIZE - 1) {
     const botDefs = BOT_POOL
-    for (let i = 0; i < LEAGUE_SIZE - 1; i++) {
-      const b = botDefs[(hashStr(`${order}-${wk}-${i}`)) % botDefs.length]
-      const base = 60 + order * 55
-      const target = base + (hashStr(`${b.name}-${wk}-${i}`) % 260)
-      await db.leagueEntry.upsert({
-        where: {
-          leagueId_weekKey_displayName: {
+    await Promise.all(
+      Array.from({ length: LEAGUE_SIZE - 1 }, (_, i) => {
+        const b = botDefs[hashStr(`${order}-${wk}-${i}`) % botDefs.length]
+        const base = 60 + order * 55
+        const target = base + (hashStr(`${b.name}-${wk}-${i}`) % 260)
+        return db.leagueEntry.upsert({
+          where: {
+            leagueId_weekKey_displayName: {
+              leagueId: `league-${order}`,
+              weekKey: wk,
+              displayName: b.name,
+            },
+          },
+          update: {},
+          create: {
             leagueId: `league-${order}`,
             weekKey: wk,
             displayName: b.name,
+            avatarEmoji: b.emoji,
+            isBot: true,
+            targetXp: target,
           },
-        },
-        update: {},
-        create: {
-          leagueId: `league-${order}`,
-          weekKey: wk,
-          displayName: b.name,
-          avatarEmoji: b.emoji,
-          isBot: true,
-          targetXp: target,
-        },
+        })
       })
-    }
+    )
   }
 
   if (changed || progress.lastWeekKey !== wk) {
@@ -592,6 +622,55 @@ export function botDisplayXp(targetXp: number, name: string, elapsed: number): n
   const jitter = hashStr(name + Math.floor(Date.now() / 3_600_000)) % 9
   const ramp = Math.min(1, elapsed * 1.12 + 0.02)
   return Math.max(0, Math.round(targetXp * ramp) + jitter)
+}
+
+// ─────────────────────────────────────────────────────────────
+//  Today's Manna (v11.5 — the daily clock)
+//  A fresh portion lands every local midnight; gathering it takes one
+//  tap and pays a small XP gift. The manna streak is its own gentle
+//  counter — it never punishes, it only counts mornings.
+// ─────────────────────────────────────────────────────────────
+
+export const MANNA_XP = 5
+
+export interface MannaState {
+  day: string
+  collected: boolean
+  mannaStreak: number
+}
+
+export function mannaStateOf(progress: UserProgress): MannaState {
+  const today = dayKey()
+  return {
+    day: today,
+    collected: progress.lastMannaDay === today,
+    mannaStreak: progress.mannaStreak,
+  }
+}
+
+/** gather today's portion — idempotent per local day */
+export async function collectManna(progress: UserProgress) {
+  const today = dayKey()
+  if (progress.lastMannaDay === today) {
+    return { ok: false as const, ...mannaStateOf(progress), xpEarned: 0 }
+  }
+  const yesterday = dayKey(new Date(Date.now() - 86400000))
+  const mannaStreak = progress.lastMannaDay === yesterday ? progress.mannaStreak + 1 : 1
+  // XP flows through the standard award path (quests, achievements, league)
+  const award = await awardActivityXp(progress, { xp: MANNA_XP })
+  const updated = await db.userProgress.update({
+    where: { userId: USER_ID },
+    data: { mannaStreak, lastMannaDay: today },
+  })
+  return {
+    ok: true as const,
+    day: today,
+    collected: true,
+    mannaStreak: updated.mannaStreak,
+    xpEarned: award.xpEarned,
+    totalXp: award.totalXp,
+    streak: award.streak,
+  }
 }
 
 // ─────────────────────────────────────────────────────────────

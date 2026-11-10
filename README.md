@@ -1,154 +1,118 @@
-# 📜 Scroll Academy — Gamified Bible Study
+<div align="center">
 
-A **Duolingo-style Bible study app** in the spirit of [Scroll Bible App](https://scrollbibleapp.com/) — no ads, no accounts, no tracking — with the full gamification playbook: streaks, XP, hearts, gems, leagues, quests, achievements, **story mode**, and a winding learning path that gets progressively harder.
+📜
 
-**Study tracks (10 courses, 165 lessons, 1,000+ challenges, 8 interactive stories):**
+# Scroll Academy
 
-| Course | What you'll learn |
-|---|---|
-| 🏛️ **Biblical Greek** | The alphabet Α→Ω, the great words of the faith, John 1:1, and the full verb engine (aspect, aorist, moods) |
-| 🕎 **Biblical Hebrew** | The 22-letter aleph-bet, nikkud vowels, Torah vocabulary, Genesis 1:1 — and reading the Shema yourself |
-| 📜 **Manuscripts & Codices** | Papyrus to parchment, Sinaiticus & Vaticanus, the Dead Sea Scrolls, textual criticism — and how we got the canon |
-| 🛡️ **Apologetics** | 1 Peter 3:15, the case for the Bible, the resurrection — and the hardest doctrines (hell, justice, judgment) handled honestly |
-| 📖 **The Big Picture** | The whole Bible as one story, with a poetry workshop (parallelism, psalm types, wisdom) |
-| 🔍 **Study Skills** | O.I.A. method, genre reading — and figures of speech: idioms, chiasmus, hyperbole |
-| 🌍 **Worldviews & Religions** | Judaism, Islam, atheism, Hinduism, Buddhism — and new religious movements (Mormonism, JW) |
-| ✨ **The Existence of God** | The full natural-theology curriculum: kalam, contingency, fine-tuning, moral argument, consciousness, reason, the ontological argument — every objection answered |
-| ⚖️ **Ethics & the Good Life** | Meta-ethics, utilitarianism vs deontology vs virtue, divine command & natural law, Euthyphro answered, character formation |
-| 🌀 **Metaphysics** | The deep grammar of reality: being, act & potency, essence & existence, ipsum esse subsistens, universals, time, eternity, free will |
+**“Thy word is a lamp unto my feet, and a light unto my path.” — Psalm 119:105 (KJV)**
 
-Every course ramps in difficulty — Foundations → Growing → **Advanced (timed challenges)** — so the app gets progressively harder as you progress.
+A Duolingo-style journey through Scripture: 19 courses, five-minute lessons,
+the whole King James Bible with the red-letter words of Christ, streaks,
+leagues, stories — and a parting-of-the-sea splash to open it all.
+
+[![CI](https://github.com/scroll-academy/scroll-academy/actions/workflows/ci.yml/badge.svg)](./.github/workflows/ci.yml)
+[![License: Proprietary](https://img.shields.io/badge/license-proprietary-blue)](./LICENSE)
+[![Scripture: KJV](https://img.shields.io/badge/scripture-KJV%20·%20public%20domain-gold)](./docs/SCRIPTURE-DESIGN.md)
+
+</div>
 
 ---
 
-## 🎭 Story Mode (dialogue-based scenarios)
+## What's inside
 
-A Duolingo-Stories-style player with chat-bubble dialogue, narration cards, and comprehension checkpoints:
+- **The learn path** — a winding trail of lessons, chests and trophies. The road ahead
+  is a trail of footprints; the road walked is a solid ribbon in the unit's color.
+- **19 courses** — Greek, Hebrew, Bible survey, manuscripts, apologetics, logic (I & II),
+  worldviews, ethics, metaphysics, existence of God, denominations (×8), study methods,
+  stories, deep practice expansions.
+- **The Bible reader** — all 66 books (KJV), reading plans, verse marks, and the
+  red-letter edition: 2,082 verses of Christ's words and direct LORD speech, stored as
+  character offsets against the exact KJV text and verified by `bun run redletter:verify`.
+- **Gamification** — XP, streaks (with repair), hearts, gems, daily quests, leagues,
+  achievements, chests, an avatar builder, and a 617-feature personalization engine
+  (`src/lib/engine/`) that decides the next best action.
+- **Community & growth** — posts, friends, a growth hub with habit plans.
+- **Scroll Pro** — monthly ($5.99, no trial) / annual ($39.99, 7-day free trial),
+  gift subscriptions, church plans (B2B pilot), and a double-sided referral program.
+- **The splash** — Remotion composition (`src/remotion/`) that parts the sea and hands
+  over to onboarding; render it to MP4 for the app stores with one command.
 
-- **8 stories across 4 categories** — Bible (Road to Emmaus, Nicodemus at Night, Joseph & the Dreamers), Apologetics (Dinner with a Skeptic), Church history (Paul at the Areopagus, Justin's School in Rome), Languages (First Day of Greek)
-- Animated chat bubbles with an emoji cast, spring transitions, tap-to-advance
-- Checkpoint questions with correct/wrong feedback and explanations
-- Full gamification integration — XP, gems, streak, quests and achievements all advance
-- Perfect-comprehension bonus, replay support, and one-tap **sharing to the community feed**
+## The stack — three languages, one product
 
-## ✨ Gamification (the full Duolingo playbook)
+| Piece | Tech | Role |
+| --- | --- | --- |
+| `app` (this repo root) | Next.js 16 · React 19 · Tailwind 4 · Prisma/SQLite · Zustand · framer-motion · Remotion | The product itself |
+| `src-tauri/` | **Rust** (Tauri 2) | Desktop shell — boots the standalone server as a sidecar, native churn/loyalty/XP ledger (`ledger.rs`, parity-tested against the TS engine), OS notifications & vibration |
+| `services-csharp/ScrollBridge/` | **C#** (.NET 8 Worker) | Scale-out worker — idempotent payment entitlements, referral conversions, push dispatch with quiet hours and per-user caps (~18 xUnit tests) |
 
-- **Winding learning path** — sticky unit headers, locked/current/completed nodes with 3D buttons, START bobbing tooltip, pulsing ring on the current node
-- **XP & levels** — base XP + first-time, perfect-lesson and combo bonuses, Double XP boost
-- **Daily goal ring** — 50 XP/day with animated progress
-- **Streaks** — daily streak with flame animation, milestone celebrations (3/7/14/30/100…), **Streak Freeze** protection
-- **Hearts** — 5 hearts, lose one per mistake, timed regeneration (10 min), refill via gems or practice
-- **Gems economy** — earned from lessons, stories, quests, chests and achievements; spend on freezes, refills, boosts
-- **Leagues** — Bronze → Diamond, 15 rivals whose XP ramps through the week, promotion/demotion zones, weekly rollover
-- **Daily quests** — deterministic daily quests with progress bars and auto-claimed gem rewards (stories count too)
-- **Achievements** — tiered achievements (Wildfire, Sage, Scholar, Flawless, Scribe, Renaissance, Quest Hunter, Bible Reader, Koinonia…)
-- **Unit chests & trophy** — 30-gem chest after each unit, trophy at course end
-- **Practice hub** — mistakes review that restores hearts
+The web app runs standalone; the Rust and C# services are the desktop and
+production-scale paths and are wired into CI.
 
-## 📖 The Bible itself
-
-- **Full Bible text** (public-domain translation, all 66 books) in a reader with verse highlighting and five highlight colors
-- **Bookmarks and notes** on any verse
-- **Reading plans** with day-by-day check-offs
-- Reading chapters awards XP and advances streaks and quests
-
-## 👥 Community & friends
-
-- **Friends system** — add friends from suggestions, send/accept requests, see streaks and weekly XP
-- **Community feed** — post achievements, streaks, verses, plan progress and story completions; like and comment
-
-## 🧑‍🎨 Avatars
-
-- Fully customizable SVG avatar — skin, hair, eyes, outfit, accessories
-- **Crucifix options** (wooden and gold) among the accessories
-
-## 🎮 UX details
-
-- **Haptics** — Web Vibration API patterns for correct/wrong/combo/complete (toggleable)
-- **Sound** — fully synthesized Web Audio effects (no audio files): correct chime, wrong buzz, combo ticks, completion fanfare
-- **Animations** — framer-motion everywhere: page transitions, progress springs, combo chip, confetti results screen, count-up stats, shake on wrong answers
-- **Notifications** — in-app notification center + real browser notifications (streak-at-risk, quest complete, achievements)
-- **Mascot** — "Papy" the animated scroll character with moods (happy, cheer, sad, think)
-- **Mobile-first** — bottom nav on phones (7 items incl. Stories), sidebar on desktop, safe-area aware, 44px+ touch targets
-
-## 🛠 Tech stack (free & open-source first)
-
-| Layer | Tech |
-|---|---|
-| Framework | **Next.js 16** (App Router) + TypeScript |
-| Styling | Tailwind CSS 4 + custom Duolingo-style design system |
-| Database | **Prisma ORM + SQLite** (local, offline, zero-config) |
-| State | Zustand (client) + TanStack Query (server) |
-| Animation | framer-motion + canvas-confetti |
-| Audio/Haptics | Web Audio API + Vibration API |
-| Desktop packaging | **Rust + Tauri 2** (`src-tauri/`) with a fully offline sidecar server |
-
-### Run the web app
+## Quickstart
 
 ```bash
 bun install
-bun run db:push          # create the SQLite schema
-bun prisma/seed.ts       # seed courses, stories, quests, achievements, leagues
-bun run dev              # http://localhost:3000
+cp .env.example .env
+mkdir -p db
+bunx prisma db push
+bun run db:seed
+bun run dev            # → http://localhost:3000
 ```
 
-### Package as a native desktop app (Rust, fully offline)
+First visit plays the parting-of-the-sea splash once, then the sign in / sign up flow,
+then onboarding. `demo staff` shortcut: sign in as `pastor@scrollthebible.org` (any
+password in the mock) to see the Staff admin → Churches dashboard.
 
-The `src-tauri/` shell ships the **entire app — server, database and Bible text —
-inside the native binary**. No internet, no Node install, nothing required:
+### Handy scripts
 
-```bash
-cargo install tauri-cli --version "^2"   # one-time
-bun run desktop:icons    # once — renders PNG/ICO/ICNS from the SVG
-bun run desktop:prepare  # builds the standalone server + seeds the desktop DB + sidecar
-cargo tauri build        # .AppImage / .deb / .msi / .dmg
+| Command | What it does |
+| --- | --- |
+| `bun run dev` / `build` / `start` | develop / build / run the standalone server |
+| `bun run lint` | ESLint over the whole app |
+| `bun run splash:studio` | open the Remotion timeline for the splash |
+| `bun run splash:render` | render the splash to `out/parting-sea.mp4` (stores, ads) |
+| `bun run db:seed` | reseed the demo database |
+| `bun run engine:test` | engine parity + behavior tests |
+| `bun run redletter:verify` | verify all 2,082 red-letter offsets against KJV text |
+| `bun run redteam` | dependency audit, secret scan, no-eval, headers check |
+| `bun run desktop:prepare && cargo tauri dev` | run the Rust desktop shell |
+
+Environment: copy `.env.example` → `.env` (`DATABASE_URL`, `NEXT_PUBLIC_APP_URL`,
+Stripe keys when payments go live). Full architecture: [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md).
+
+```text
+┌──────────────────────────── browser ────────────────────────────┐
+│  Next.js 16 app  ·  Prisma (SQLite)  ·  engine (TS, 617 feats)  │
+└───────┬──────────────────────────────────────────────┬──────────┘
+        │ desktop build (sidecar)                      │ scale-out (production)
+┌───────▼──────────────┐                    ┌───────────▼──────────────┐
+│  Rust · Tauri shell   │                    │  C# · ScrollBridge worker │
+│  ledger parity, OS    │                    │  entitlements, referrals, │
+│  notifications        │                    │  push (quiet hours)       │
+└───────────────────────┘                    └──────────────────────────┘
 ```
 
-See [`src-tauri/README.md`](src-tauri/README.md) for the full architecture:
-the Rust shell copies the bundled server + pre-seeded SQLite into the OS
-app-data directory on first run, spawns a bundled Bun runtime sidecar on
-`127.0.0.1:3313`, waits for readiness, and only then reveals the window.
-Tauri plugins included:
+## Scripture & tone — the two non-negotiables
 
-- `tauri-plugin-notification` — native OS notifications for streak reminders
-- `tauri-plugin-vibration` — native haptics on Android
-- `tauri-plugin-shell` — sidecar lifecycle (spawn, readiness, shutdown)
+1. **Scripture is exact.** KJV only (public domain), quoted letter-perfect with its
+   reference, verified by script. Interface microcopy lives in `src/lib/scripture.ts`
+   under restraint rules: never on money surfaces, never on error states, one verse per
+   surface. Details: [docs/SCRIPTURE-DESIGN.md](./docs/SCRIPTURE-DESIGN.md).
+2. **We don't sound like mercenaries.** No fake countdowns, no invented ratings, no
+   exit interrupts, no shouting CTAs. Pricing is stated in plain language, cancellation
+   is two taps, and the free academy is free forever. Sales frameworks live in the B2B
+   pilot materials ([docs/](./docs)) — never in the member UI.
 
-### Reset the demo data
+## Security
 
-```bash
-bun scripts/reset-demo.ts   # keeps profile + chosen course, clears progress
-```
+Conservative headers (`next.config.ts`), transactional reward grants with unique-keyed
+milestones, PBKDF2 password hashing even in the demo auth, body-size caps, no
+client-minted entitlements, and a red-team script wired into CI. Report privately via
+GitHub Security Advisories — see [SECURITY.md](./SECURITY.md) and [docs/SECURITY.md](./docs/SECURITY.md).
 
-## 📁 Project structure
+## Contributing & license
 
-```
-prisma/
-  schema.prisma           # full gamification + story-mode data model
-  seed.ts                 # seeder orchestration
-  seed-data/              # course content:
-                          #   greek, hebrew, bibleSurvey, studyMethods,
-                          #   worldviews, manuscripts, apologetics,
-                          #   existence, ethics, metaphysics, expansions,
-                          #   stories, meta (quests, achievements, bots…)
-src/
-  app/api/                # bootstrap, courses, lessons, complete, practice,
-                          # hearts, leaderboard, quests, shop, chests,
-                          # notifications, profile, settings, bible, plans,
-                          # friends, community, stories
-  lib/gamification.ts     # streaks, quests, leagues, achievements, hearts engine
-  lib/client/             # sound synth, haptics, notifications, zustand store
-  components/scroll/      # the whole UI (path, lesson player, story player,
-                          # bible reader, community, avatar builder, views)
-src-tauri/                # Rust desktop shell (offline sidecar architecture)
-scripts/
-  prepare-desktop.mjs     # desktop build pipeline
-  make-icons.mjs          # PNG/ICO/ICNS icon generation
-  desktop-server.js       # the offline server launcher (sidecar entry)
-```
-
-## 📖 Content notes
-
-All lesson content is written to be scholarly and fair: manuscript counts and dates reflect standard references (Sinaiticus ~AD 330–360, Dead Sea Scrolls 1947, ~5,800+ Greek NT manuscripts), the apologetics and Existence-of-God courses present the classical arguments alongside how philosophers actually debate them (objections and replies), the worldviews course describes other faiths respectfully while marking real differences, and language lessons use real verses (John 1:1, Genesis 1:1, Deuteronomy 6:4, Psalm 117) with accurate transliterations.
-
-*"Your word is a lamp to my feet and a light for my path." — Psalm 119:105*
+[CONTRIBUTING.md](./CONTRIBUTING.md) has the setup, conventions and the PR checklist.
+Proprietary — all rights reserved; see [LICENSE](./LICENSE). The Scripture text is
+public domain. Built with [Remotion](https://remotion.dev) (check its license for your
+company size).

@@ -19,6 +19,11 @@ const eslintConfig = [...nextCoreWebVitals, ...nextTypescript, {
     // React rules
     "react-hooks/exhaustive-deps": "off",
     "react-hooks/purity": "off",
+    // legacy files (LessonView, PaywallModal, carousel) still read
+    // storage / init plugins inside effects — migrate them gradually.
+    // New code must stay clean: defer the read (setTimeout 0) or use
+    // useSyncExternalStore, like ScrollApp/AdventBanner/useIsMobile.
+    "react-hooks/set-state-in-effect": "warn",
     "react/no-unescaped-entities": "off",
     "react/display-name": "off",
     "react/prop-types": "off",

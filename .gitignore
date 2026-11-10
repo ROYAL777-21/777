@@ -60,8 +60,15 @@ server.log
 /src-tauri/target/
 /src-tauri/gen/
 
-# Local runtime data and generated tool output
+# workspace artifacts — kept locally, never shipped
 /db/*.db
 /db/*.db-*
-/.zscripts/*.pid
 /tool-results/
+/screenshots/
+/download/
+/upload/
+/out/
+/.zscripts/
+/mini-services/
+obj/
+bin/

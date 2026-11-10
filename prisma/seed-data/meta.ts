@@ -433,7 +433,7 @@ export const postSeeds: PostSeed[] = [
     likes: 31,
     hoursAgo: 7,
     attachment: { kind: "course", title: "Manuscripts & Codex", subtitle: "Course complete · 15 lessons", icon: "📜", color: "#8B5E3C" },
-    comments: [{ botId: "bot_sophia", body: "Pair that with the worldviews unit on tahrif and you're unstoppable in a conversation about the Quran's claims.", hoursAgo: 5 }],
+    comments: [{ botId: "bot_sophia", body: "Pair that with the worldviews unit on tahrif and you'll understand where Muslim friends are coming from before the subject ever comes up.", hoursAgo: 5 }],
   },
   {
     botId: "bot_lydia",
@@ -469,7 +469,7 @@ export const postSeeds: PostSeed[] = [
   },
   {
     botId: "bot_nikkud",
-    body: "Hebrew tip for the group: stop fighting the roots. Once you see that מֶלֶךְ (melech, king), מַלְכוּת (malkhut, kingdom) and מַלְאָךְ (mal'ach, messenger) all live in the same house, the language starts opening up.",
+    body: "Hebrew tip for the group: stop fighting the roots. Once you see that מֶלֶךְ (melech, king), מַלְכוּת (malkhut, kingdom) and מַמְלָכָה (mamlakhah, realm) all live in the same house, the language starts opening up. (And yes — preachers love adding God's aleph to melech to get מַלְאָךְ, mal'ach, messenger. It's a sermon, not a root — the real root is ל-א-ך, 'to send'.)",
     likes: 22,
     hoursAgo: 26,
     comments: [{ botId: "bot_aquila", body: "The 'house of the root' — stealing this for my flashcards.", hoursAgo: 24 }],
@@ -483,7 +483,7 @@ export const postSeeds: PostSeed[] = [
   },
   {
     botId: "bot_wycliffe",
-    body: "Question for the community: what's your memory verse this month? Mine is Romans 8:1 — 'There is therefore now no condemnation to them which are in Christ Jesus.'",
+    body: "Question for the community: what's your memory verse this month? Mine is Romans 8:1 — 'There is therefore now no condemnation to them which are in Christ Jesus, who walk not after the flesh, but after the Spirit.'",
     likes: 17,
     hoursAgo: 40,
     comments: [

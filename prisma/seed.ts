@@ -24,6 +24,10 @@ import { storySeeds2 } from "./seed-data/stories2"
 import { expandCoursesWithDeepPractice } from "./seed-data/deepPractice"
 import { buildUnitTips } from "./seed-data/tips"
 import { questSeeds, achievementSeeds, storeItemSeeds, leagueSeeds, botUserSeeds, incomingRequestSeed, postSeeds } from "./seed-data/meta"
+import { catholicCourse, orthodoxCourse, pentecostalCourse, baptistCourse } from "./seed-data/denominations1"
+import { anglicanCourse, methodistCourse, lutheranCourse, reformedCourse } from "./seed-data/denominations2"
+import { logicCourse } from "./seed-data/logic1"
+import { churchOrgSeed, churchMemberSeeds } from "./seed-data/church"
 import type { SeedCourse } from "./seed-data/helpers"
 
 const baseCourses: SeedCourse[] = [
@@ -34,9 +38,23 @@ const baseCourses: SeedCourse[] = [
   worldviewsCourse,
   manuscriptsCourse,
   apologeticsCourse,
+  logicCourse, // 🧠 reasoning & fallacies — the Berean skill set
   existenceCourse,
   ethicsCourse,
   metaphysicsCourse,
+]
+
+// the most popular denominations first (by global adherent count) —
+// the user asked for "more denominations, the more popular ones to start"
+const denominationCourses: SeedCourse[] = [
+  catholicCourse, // ~1.3B
+  orthodoxCourse, // ~220M
+  pentecostalCourse, // ~280M
+  baptistCourse, // ~100M
+  anglicanCourse, // ~85M
+  methodistCourse, // ~80M
+  reformedCourse, // ~80M
+  lutheranCourse, // ~75M
 ]
 
 // merge the expansion units onto their courses (appended at the end)…
@@ -47,7 +65,7 @@ const mergedCourses: SeedCourse[] = baseCourses.map((c) => ({
 
 // …then expand EVERY unit by 5 deep-practice lessons
 // (Listening Lab · Spelling Studio · Speak Out · Mixed Review · Unit Mastery)
-const courses: SeedCourse[] = expandCoursesWithDeepPractice(mergedCourses)
+const courses: SeedCourse[] = expandCoursesWithDeepPractice([...mergedCourses, ...denominationCourses])
 
 // growth tips per unit (in-app · outside-app · routine)
 const unitTips = buildUnitTips(courses)
@@ -322,11 +340,73 @@ async function main() {
   }
   console.log(`✅ Stories seeded: ${allStories.length}`)
 
+  // ── church pilot (B2B dashboard) — REVENUE.md §6 weeks 3–6 ──
+  // upsert by slug; members are replaced each run (the pilot cohort's
+  // stored snapshot refreshes, user progress rows are never touched)
+  const org = await db.churchOrg.upsert({
+    where: { slug: churchOrgSeed.slug },
+    update: {
+      name: churchOrgSeed.name,
+      city: churchOrgSeed.city,
+      tier: churchOrgSeed.tier,
+      seatsTotal: churchOrgSeed.seatsTotal,
+      priceMonthly: churchOrgSeed.priceMonthly,
+      contactName: churchOrgSeed.contactName,
+      contactEmail: churchOrgSeed.contactEmail,
+      focusCourse: churchOrgSeed.focusCourse,
+      renewalAt: new Date(Date.now() + 18 * 86400000), // next billing date
+    },
+    create: {
+      slug: churchOrgSeed.slug,
+      name: churchOrgSeed.name,
+      city: churchOrgSeed.city,
+      tier: churchOrgSeed.tier,
+      seatsTotal: churchOrgSeed.seatsTotal,
+      priceMonthly: churchOrgSeed.priceMonthly,
+      contactName: churchOrgSeed.contactName,
+      contactEmail: churchOrgSeed.contactEmail,
+      focusCourse: churchOrgSeed.focusCourse,
+      startedAt: new Date(Date.now() - 42 * 86400000),
+      renewalAt: new Date(Date.now() + 18 * 86400000),
+    },
+  })
+  await db.churchMember.deleteMany({ where: { orgId: org.id } })
+  // the admin seat — live stats, computed by the API (none stored)
+  await db.churchMember.create({
+    data: {
+      orgId: org.id,
+      userId: "user_1",
+      name: "Scribe",
+      emoji: "📜",
+      role: "admin",
+      joinedAt: new Date(Date.now() - 42 * 86400000),
+    },
+  })
+  for (const m of churchMemberSeeds) {
+    await db.churchMember.create({
+      data: {
+        orgId: org.id,
+        name: m.name,
+        emoji: m.emoji,
+        role: "member",
+        joinedAt: new Date(Date.now() - m.daysAgoJoined * 86400000),
+        lessons: m.lessons,
+        chaptersRead: m.chaptersRead,
+        streak: m.streak,
+        weeklyXp: m.weeklyXp,
+        lastActiveDaysAgo: m.lastActiveDaysAgo,
+        weeksJson: JSON.stringify(m.weeks.map((w) => ({ lessons: w[0], chapters: w[1], xp: w[2] }))),
+      },
+    })
+  }
+  console.log(`✅ Church pilot seeded: ${churchMemberSeeds.length + 1}/${churchOrgSeed.seatsTotal} seats at ${churchOrgSeed.name}`)
+
   const lessonCount = await db.lesson.count()
   const challengeCount = await db.challenge.count()
   const optionCount = await db.challengeOption.count()
   const storyCount = await db.story.count()
-  console.log(`📊 Totals — lessons: ${lessonCount}, challenges: ${challengeCount}, options: ${optionCount}, stories: ${storyCount}`)
+  const memberCount = await db.churchMember.count()
+  console.log(`📊 Totals — lessons: ${lessonCount}, challenges: ${challengeCount}, options: ${optionCount}, stories: ${storyCount}, church seats: ${memberCount}`)
   console.log("🌱 Seed complete!")
 }
 

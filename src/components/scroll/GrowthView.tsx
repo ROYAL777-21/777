@@ -46,8 +46,8 @@ const SLOT_META = {
 } as const
 
 function dayKeyLocal(): string {
-  const d = new Date(Date.now() + 8 * 3600 * 1000)
-  return d.toISOString().slice(0, 10)
+  const d = new Date() // browser-local — matches the server's dayKey on the user's own machine
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
 }
 
 // ═══════════════════════════════════════════════════════════════

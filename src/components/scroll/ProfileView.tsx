@@ -3,16 +3,22 @@
 import { useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { motion } from "framer-motion"
-import { Pencil, Check, Volume2, Vibrate, BellRing, Flame, Zap, BookOpen, Target, Star, Palette, Share2, BookOpenCheck, Users, UserPlus } from "lucide-react"
+import { Pencil, Check, Volume2, Vibrate, BellRing, Flame, Zap, BookOpen, Target, Star, Palette, Share2, BookOpenCheck, Users, UserPlus, Crown, Sparkles } from "lucide-react"
 import { parseAvatar } from "@/lib/avatar"
 import { useAppStore } from "@/lib/client/store"
 import { sfx } from "@/lib/client/sound"
 import { haptics } from "@/lib/client/haptics"
 import { requestNotificationPermission, fireBrowserNotification } from "@/lib/client/notify"
+import { useMotionPrefs } from "@/lib/motion/MotionPrefs"
 import type { ProfilePayload } from "@/lib/types"
 import { useRefreshApp } from "./ScrollApp"
 import { AvatarSvg } from "./AvatarSvg"
 import { Mascot } from "./Mascot"
+import { ExploreMenu, PlanCard, ReferralCard, NotificationPrefsCard, StatementOfFaith, AccountCard } from "./ProfileExtras"
+import { ChurchPlanCard, GiftCard } from "./ProfileCards"
+import { InsightsPanel } from "./InsightsPanel"
+import { WidgetGallery } from "./WidgetGallery" // v11: animated home-screen widgets + desktop companion
+import { AssistantSetup } from "./AssistantSetup" // v11: Siri / Android Assistant bridge setup
 
 const AVATARS = ["🦁", "🕊️", "🐑", "🦉", "🐉", "🌟", "🕎", "🛡️", "📜", "👑", "🌾", "🐟"]
 
@@ -23,8 +29,10 @@ export function ProfileView() {
   const pushToast = useAppStore((s) => s.pushToast)
   const soundOn = useAppStore((s) => s.soundOn)
   const hapticsOn = useAppStore((s) => s.hapticsOn)
+  const { pref: motionPref, osReduced, setPref: setMotionPref } = useMotionPrefs()
   const setSound = useAppStore((s) => s.setSound)
   const setHaptics = useAppStore((s) => s.setHaptics)
+  const openPaywall = useAppStore((s) => s.openPaywall)
 
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState("")
@@ -63,6 +71,24 @@ export function ProfileView() {
     },
   })
 
+  // v11.5 — goal agency: the learner sizes their own daily portion.
+  // Auto-chosen goals beat assigned ones (self-determination research);
+  // the engine still re-sizes nudge thresholds around the choice.
+  const setGoal = useMutation({
+    mutationFn: async (dailyGoal: number | null) => {
+      const res = await fetch("/api/settings", { method: "POST", body: JSON.stringify({ dailyGoal }) })
+      if (!res.ok) throw new Error("failed")
+      return res.json() as Promise<{ ok: boolean; dailyGoal: number | null }>
+    },
+    onSuccess: () => {
+      sfx.correct()
+      haptics.light()
+      refreshApp()
+      void qc.invalidateQueries({ queryKey: ["profile"] })
+      void qc.invalidateQueries({ queryKey: ["bootstrap"] })
+    },
+  })
+
   if (isLoading || !data) {
     return (
       <div className="p-8 flex flex-col items-center gap-3">
@@ -76,6 +102,8 @@ export function ProfileView() {
 
   return (
     <div className="p-3 sm:p-5 max-w-2xl mx-auto pb-10">
+      {/* the Scribe's Ledger — fully transparent personalization */}
+      <InsightsPanel />
       {/* identity card */}
       <div className="bg-white rounded-3xl border-2 border-paper-border shadow-[0_5px_0_#e8e0c8] p-5 mb-4">
         {!editing ? (
@@ -196,6 +224,12 @@ export function ProfileView() {
         </div>
       </div>
 
+      {/* Scroll Pro — membership / upgrade */}
+      <PlanCard />
+
+      {/* church plan — the B2B membership (pilot program) */}
+      <ChurchPlanCard />
+
       {/* stats grid */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
         <Stat icon={<Flame className="w-5 h-5" />} color="#E4453D" label="Day streak" value={data.streak} delay={0.05} />
@@ -208,9 +242,67 @@ export function ProfileView() {
         <Stat icon={<Users className="w-5 h-5" />} color="#E4453D" label="Friends" value={data.friends} delay={0.4} />
       </div>
 
-      {/* weekly activity */}
+      {/* v11.5 — the daily goal picker: your portion, your call.
+          Small (20) / Steady (50) / Intense (100), or let the engine size it. */}
       <div className="bg-white rounded-3xl border-2 border-paper-border shadow-[0_5px_0_#e8e0c8] p-5 mb-4">
-        <h2 className="font-black mb-3">This week&apos;s study</h2>
+        <div className="flex items-center justify-between mb-1">
+          <h2 className="font-black">Daily goal</h2>
+          <span className="text-[10px] font-black text-duo-green-dark bg-duo-green/10 rounded-full px-2 py-0.5">CHOOSE YOUR PORTION</span>
+        </div>
+        <p className="text-xs font-bold text-muted-foreground mb-3">
+          Goals you pick yourself are the ones that stick. Change it anytime — the Academy adapts.
+        </p>
+        <div className="grid grid-cols-3 gap-2.5 mb-2.5">
+          {[
+            { v: 20, label: "Casual", note: "~1 lesson a day", emoji: "🌱" },
+            { v: 50, label: "Steady", note: "~2 lessons a day", emoji: "🌿" },
+            { v: 100, label: "Intense", note: "~4 lessons a day", emoji: "🌳" },
+          ].map((g) => {
+            const active = data.dailyGoal === g.v
+            return (
+              <motion.button
+                key={g.v}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => {
+                  if (!active) setGoal.mutate(g.v)
+                }}
+                disabled={setGoal.isPending}
+                className={`rounded-2xl border-2 p-3 text-center transition-colors disabled:opacity-60 ${
+                  active
+                    ? "border-duo-green bg-duo-green/10 shadow-[0_3px_0_#46a302]"
+                    : "border-paper-border hover:border-duo-green/50 shadow-[0_3px_0_#e8e0c8]"
+                }`}
+                aria-pressed={active}
+                aria-label={`Daily goal: ${g.label}, ${g.v} XP`}
+              >
+                <span className="block text-2xl mb-0.5">{g.emoji}</span>
+                <span className={`block font-black text-sm leading-tight ${active ? "text-duo-green-dark" : ""}`}>{g.label}</span>
+                <span className="block text-[11px] font-black tabular-nums">{g.v} XP</span>
+                <span className="block text-[10px] font-bold text-muted-foreground leading-tight mt-0.5">{g.note}</span>
+              </motion.button>
+            )
+          })}
+        </div>
+        <button
+          onClick={() => {
+            if (data.dailyGoal !== null) setGoal.mutate(null)
+          }}
+          disabled={setGoal.isPending}
+          className="text-xs font-black text-muted-foreground hover:text-foreground underline underline-offset-2 disabled:opacity-60"
+        >
+          {data.dailyGoal === null
+            ? "✓ Papy sizes it for you (engine-tuned, ~50 XP)"
+            : "Let Papy size it for me (engine-tuned)"}
+        </button>
+      </div>
+
+      {/* weekly activity — Advanced stats (Scroll Pro) */}
+      {data.plan !== "free" ? (
+      <div className="bg-white rounded-3xl border-2 border-paper-border shadow-[0_5px_0_#e8e0c8] p-5 mb-4">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-black">This week&apos;s study</h2>
+          <span className="text-[10px] font-black text-amber-600 bg-amber-100 rounded-full px-2 py-0.5">PRO · 2× XP WEEKENDS</span>
+        </div>
         <div className="flex items-end justify-between gap-2 h-28">
           {data.history.map((h, i) => {
             const max = Math.max(10, ...data.history.map((x) => x.xp))
@@ -230,7 +322,27 @@ export function ProfileView() {
             )
           })}
         </div>
+        <p className="text-[11px] font-bold text-muted-foreground mt-3">Pro perk: every Saturday &amp; Sunday counts double XP — it&apos;s already applied to this chart.</p>
       </div>
+      ) : (
+      <button
+        onClick={() => {
+          sfx.tap()
+          openPaywall("profile")
+        }}
+        className="w-full text-left bg-white rounded-3xl border-2 border-dashed border-paper-border shadow-[0_5px_0_#e8e0c8] p-5 mb-4"
+      >
+        <div className="flex items-center gap-3">
+          <span className="w-11 h-11 shrink-0 rounded-2xl bg-amber-100 grid place-items-center">
+            <Crown className="w-6 h-6 text-amber-600" />
+          </span>
+          <div className="flex-1">
+            <h2 className="font-black">Advanced stats &amp; mastery maps</h2>
+            <p className="text-xs font-bold text-muted-foreground mt-0.5">Weekly XP trends, accuracy curves and 2× XP weekends — unlock with Scroll Pro.</p>
+          </div>
+        </div>
+      </button>
+      )}
 
       {/* courses */}
       <div className="bg-white rounded-3xl border-2 border-paper-border shadow-[0_5px_0_#e8e0c8] p-5 mb-4">
@@ -348,6 +460,30 @@ export function ProfileView() {
         </div>
       </div>
 
+      {/* explore — the consolidated navigation (Quests, Leagues, Shop, Community…) */}
+      <ExploreMenu />
+
+      {/* doctrinal foundation — what every course is taught from */}
+      <StatementOfFaith />
+
+      {/* v11: animated widgets for phone & laptop */}
+      <WidgetGallery />
+
+      {/* v11: Siri / Android Assistant voice bridge */}
+      <AssistantSetup />
+
+      {/* give-a-month-get-a-month referral loop */}
+      <ReferralCard />
+
+      {/* gift subscriptions — redeem + the sent ledger */}
+      <GiftCard />
+
+      {/* notifications & email journeys */}
+      <NotificationPrefsCard />
+
+      {/* account — sign-in state, sign out, guest → account upgrade */}
+      <AccountCard />
+
       {/* settings */}
       <div className="bg-white rounded-3xl border-2 border-paper-border shadow-[0_5px_0_#e8e0c8] p-5">
         <h2 className="font-black mb-3">Settings</h2>
@@ -370,6 +506,23 @@ export function ProfileView() {
               if (!hapticsOn) haptics.light()
             }}
           />
+          {/* v11.4: motion is a device-level preference (a phone may need
+              calm, a desktop may not) — stored per device, like Duolingo */}
+          <SettingRow
+            icon={<Sparkles className="w-5 h-5" />}
+            label="Animations"
+            on={motionPref === "full"}
+            onToggle={() => {
+              const next = motionPref === "full" ? "reduced" : "full"
+              setMotionPref(next)
+              if (next === "full") sfx.correct()
+            }}
+          />
+          {osReduced && motionPref === "full" && (
+            <p className="text-xs font-bold text-muted-foreground px-1 -mt-1">
+              Your system currently asks for reduced motion — turning this on keeps full animation on this device.
+            </p>
+          )}
           <button
             className="flex items-center gap-3 bg-secondary rounded-2xl px-4 py-3 font-extrabold hover:bg-paper-border/50 transition-colors"
             onClick={async () => {

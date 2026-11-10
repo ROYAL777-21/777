@@ -10,6 +10,7 @@ import { sfx } from "@/lib/client/sound"
 import { haptics } from "@/lib/client/haptics"
 import type { BotDTO, FriendsPayload } from "@/lib/types"
 import { AvatarSvg } from "./AvatarSvg"
+import { FriendsInviteBanner } from "./FriendsInviteBanner"
 import { useRefreshApp } from "./ScrollApp"
 
 export function FriendsView() {
@@ -24,6 +25,9 @@ export function FriendsView() {
           </h1>
           <p className="text-muted-foreground font-bold text-sm mt-1">Encourage one another — streaks, quests and study side by side</p>
         </header>
+
+        {/* the referral loop's natural home — invite who isn't here yet */}
+        <FriendsInviteBanner />
 
         <div className="flex gap-2 mb-5">
           {(
